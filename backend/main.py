@@ -9,11 +9,9 @@ from config import settings
 
 from routers import documents, evaluations, standards, reports, certifier, settings as settings_router, samples
 
-# Initialize database schema
-Base.metadata.create_all(bind=engine)
-
-# Seed database on startup only if uninitialized
+# Initialize database schema safely
 try:
+    Base.metadata.create_all(bind=engine)
     from models import Standard
     db = SessionLocal()
     if db.query(Standard).first() is None:
@@ -51,6 +49,8 @@ app.include_router(settings_router.router)
 app.include_router(samples.router)
 
 @app.get("/")
+@app.get("/api")
+@app.get("/api/")
 def root():
     return {
         "app": "MedVerify AI",

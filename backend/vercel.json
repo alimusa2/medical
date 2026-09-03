@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "buildCommand": "echo Backend build ready",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/api/index.py"
+    }
+  ]
+}
