@@ -1,0 +1,39 @@
+# Node / Vite build & dependencies
+node_modules/
+dist/
+frontend/dist/
+frontend/node_modules/
+
+# Python caches & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+venv/
+.venv/
+env/
+
+# Environment files & secrets
+.env
+.env.local
+.env.*.local
+
+# SQLite Database & Local storage
+*.db
+*.sqlite
+reports/
+samples/
+uploads/
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/reports/*
+!backend/reports/.gitkeep
+backend/samples/*
+!backend/samples/.gitkeep
+
+# IDE & System files
+.DS_Store
+Thumbs.db
+debug.log
+.vscode/
+.idea/
