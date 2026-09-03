@@ -51,6 +51,8 @@ app.include_router(samples.router)
 @app.get("/")
 @app.get("/api")
 @app.get("/api/")
+@app.get("/api/index.py")
+@app.get("/index.py")
 def root():
     return {
         "app": "MedVerify AI",

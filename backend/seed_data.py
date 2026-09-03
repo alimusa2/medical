@@ -2,10 +2,6 @@ import os
 import uuid
 import pandas as pd
 from sqlalchemy.orm import Session
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib import colors
 
 from database import engine, SessionLocal, Base
 from models import DeviceType, Standard, Requirement, UploadedDocument, Evaluation, EvaluationResult
@@ -420,20 +416,30 @@ def seed_all_15_demo_evaluations(db: Session):
     db.query(UploadedDocument).delete()
     db.commit()
 
-    styles = getSampleStyleSheet()
+    try:
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib import colors
 
-    title_style = ParagraphStyle(
-        'DocTitle', parent=styles['Heading1'], fontSize=18, leading=22, textColor=colors.HexColor("#0f172a"), spaceAfter=4
-    )
-    subtitle_style = ParagraphStyle(
-        'DocSubtitle', parent=styles['Normal'], fontSize=9, leading=13, textColor=colors.HexColor("#0284c7"), spaceAfter=10
-    )
-    disclaimer_style = ParagraphStyle(
-        'Disclaimer', parent=styles['Normal'], fontSize=8, leading=11, textColor=colors.HexColor("#b91c1c"), spaceBefore=6, spaceAfter=8
-    )
-    section_heading = ParagraphStyle(
-        'SectionHeading', parent=styles['Heading2'], fontSize=11, leading=15, textColor=colors.HexColor("#0f172a"), spaceBefore=10, spaceAfter=6
-    )
+        styles = getSampleStyleSheet()
+
+        title_style = ParagraphStyle(
+            'DocTitle', parent=styles['Heading1'], fontSize=18, leading=22, textColor=colors.HexColor("#0f172a"), spaceAfter=4
+        )
+        subtitle_style = ParagraphStyle(
+            'DocSubtitle', parent=styles['Normal'], fontSize=9, leading=13, textColor=colors.HexColor("#0284c7"), spaceAfter=10
+        )
+        disclaimer_style = ParagraphStyle(
+            'Disclaimer', parent=styles['Normal'], fontSize=8, leading=11, textColor=colors.HexColor("#b91c1c"), spaceBefore=6, spaceAfter=8
+        )
+        section_heading = ParagraphStyle(
+            'SectionHeading', parent=styles['Heading2'], fontSize=11, leading=15, textColor=colors.HexColor("#0f172a"), spaceBefore=10, spaceAfter=6
+        )
+        has_reportlab = True
+    except Exception as e:
+        print(f"Warning: reportlab not available for PDF seeding: {e}")
+        has_reportlab = False
 
     for idx, sc in enumerate(demo_scenarios, start=1):
         cat_key = sc["cat_key"]
@@ -444,64 +450,67 @@ def seed_all_15_demo_evaluations(db: Session):
         report_num = sc["report_num"]
         tests_data = sc["tests"]
 
-        # Build PDF Sample File
+        # Build PDF Sample File if reportlab is available
         filename = f"demo_TRF_{idx:02d}_{cat_key.replace(' ', '_').replace('/', '_')}.pdf"
         file_path = os.path.join(sample_dir, filename)
-
-        doc = SimpleDocTemplate(file_path, pagesize=letter, rightMargin=36, leftMargin=36, topMargin=36, bottomMargin=36)
-        story = []
-
-        story.append(Paragraph(f"TEST REPORT FORM (TRF) — {cat_info['name'].upper()}", title_style))
-        story.append(Paragraph(f"Report No: {report_num}  |  Pathway: {cat_info['pathway']}  |  Standard: {cat_info['particular_standard']}", subtitle_style))
-        story.append(Paragraph("⚠️ DEMONSTRATION DOCUMENT — SYNTHETIC DATA — NOT FOR CERTIFICATION USE", disclaimer_style))
-        story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#cbd5e1"), spaceAfter=10))
-
-        story.append(Paragraph("1. Device & Test Laboratory Specifications", section_heading))
-        meta_rows = [
-            ["Device Name:", cat_info['name'], "Model Number:", model],
-            ["Manufacturer:", mfr, "Serial Number:", serial],
-            ["Device Category:", cat_key, "Report Number:", report_num],
-            ["Safety Pathway:", cat_info['pathway'], "Test Date:", "2026-08-28"]
-        ]
-        t_meta = Table(meta_rows, colWidths=[110, 160, 110, 160])
-        t_meta.setStyle(TableStyle([
-            ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
-            ('FONTSIZE', (0,0), (-1,-1), 8.5),
-            ('TEXTCOLOR', (0,0), (0,-1), colors.HexColor("#475569")),
-            ('TEXTCOLOR', (2,0), (2,-1), colors.HexColor("#475569")),
-            ('FONTNAME', (0,0), (0,-1), 'Helvetica-Bold'),
-            ('FONTNAME', (2,0), (2,-1), 'Helvetica-Bold'),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 3),
-        ]))
-        story.append(t_meta)
-        story.append(Spacer(1, 10))
-
-        story.append(Paragraph("2. Laboratory Test Results & Evidence", section_heading))
-        t_rows = [["Test Parameter", "Measured Result", "Unit", "Technician Observation / Evidence"]]
-        for t in tests_data:
-            t_rows.append([
-                t["test_name"],
-                str(t["result"]),
-                t.get("unit", "-"),
-                t.get("evidence", "Recorded")
-            ])
-        
-        t_tests = Table(t_rows, colWidths=[140, 95, 55, 250])
-        t_tests.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#f1f5f9")),
-            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0,0), (-1,-1), 8.5),
-            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#e2e8f0")),
-            ('PADDING', (0,0), (-1,-1), 5),
-        ]))
-        story.append(t_tests)
-        doc.build(story)
-
-        # Also copy file to upload dir for document model
         upload_path = os.path.join(upload_dir, filename)
-        with open(file_path, "rb") as rf:
-            with open(upload_path, "wb") as wf:
-                wf.write(rf.read())
+
+        if has_reportlab:
+            try:
+                doc = SimpleDocTemplate(file_path, pagesize=letter, rightMargin=36, leftMargin=36, topMargin=36, bottomMargin=36)
+                story = []
+
+                story.append(Paragraph(f"TEST REPORT FORM (TRF) — {cat_info['name'].upper()}", title_style))
+                story.append(Paragraph(f"Report No: {report_num}  |  Pathway: {cat_info['pathway']}  |  Standard: {cat_info['particular_standard']}", subtitle_style))
+                story.append(Paragraph("⚠️ DEMONSTRATION DOCUMENT — SYNTHETIC DATA — NOT FOR CERTIFICATION USE", disclaimer_style))
+                story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#cbd5e1"), spaceAfter=10))
+
+                story.append(Paragraph("1. Device & Test Laboratory Specifications", section_heading))
+                meta_rows = [
+                    ["Device Name:", cat_info['name'], "Model Number:", model],
+                    ["Manufacturer:", mfr, "Serial Number:", serial],
+                    ["Device Category:", cat_key, "Report Number:", report_num],
+                    ["Safety Pathway:", cat_info['pathway'], "Test Date:", "2026-08-28"]
+                ]
+                t_meta = Table(meta_rows, colWidths=[110, 160, 110, 160])
+                t_meta.setStyle(TableStyle([
+                    ('FONTNAME', (0,0), (-1,-1), 'Helvetica'),
+                    ('FONTSIZE', (0,0), (-1,-1), 8.5),
+                    ('TEXTCOLOR', (0,0), (0,-1), colors.HexColor("#475569")),
+                    ('TEXTCOLOR', (2,0), (2,-1), colors.HexColor("#475569")),
+                    ('FONTNAME', (0,0), (0,-1), 'Helvetica-Bold'),
+                    ('FONTNAME', (2,0), (2,-1), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+                ]))
+                story.append(t_meta)
+                story.append(Spacer(1, 10))
+
+                story.append(Paragraph("2. Laboratory Test Results & Evidence", section_heading))
+                t_rows = [["Test Parameter", "Measured Result", "Unit", "Technician Observation / Evidence"]]
+                for t in tests_data:
+                    t_rows.append([
+                        t["test_name"],
+                        str(t["result"]),
+                        t.get("unit", "-"),
+                        t.get("evidence", "Recorded")
+                    ])
+                
+                t_tests = Table(t_rows, colWidths=[140, 95, 55, 250])
+                t_tests.setStyle(TableStyle([
+                    ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#f1f5f9")),
+                    ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0,0), (-1,-1), 8.5),
+                    ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#e2e8f0")),
+                    ('PADDING', (0,0), (-1,-1), 5),
+                ]))
+                story.append(t_tests)
+                doc.build(story)
+
+                with open(file_path, "rb") as rf:
+                    with open(upload_path, "wb") as wf:
+                        wf.write(rf.read())
+            except Exception as e:
+                print(f"Warning building sample PDF {filename}: {e}")
 
         # Construct Normalized TRF Schema
         tests_schemas = []

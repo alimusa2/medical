@@ -2,8 +2,6 @@ import json
 import re
 from typing import Dict, Any, List
 import pandas as pd
-import pymupdf as fitz  # PyMuPDF
-import docx
 
 from schemas import NormalizedTRFSchema, DeviceInfoSchema, ExtractedStandardSchema, ExtractedTestSchema
 
@@ -24,6 +22,10 @@ class DocumentProcessor:
 
     @staticmethod
     def _process_pdf(file_path: str) -> NormalizedTRFSchema:
+        try:
+            import pymupdf as fitz
+        except ImportError:
+            import fitz
         doc = fitz.open(file_path)
         full_text = ""
         extracted_tests: List[ExtractedTestSchema] = []
@@ -94,6 +96,7 @@ class DocumentProcessor:
 
     @staticmethod
     def _process_docx(file_path: str) -> NormalizedTRFSchema:
+        import docx
         doc = docx.Document(file_path)
         full_text = []
         for p in doc.paragraphs:

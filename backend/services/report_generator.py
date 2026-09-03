@@ -5,13 +5,28 @@ import json
 from datetime import datetime
 from typing import Dict, Any, List
 
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable, KeepTogether
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib import colors
-from reportlab.pdfgen import canvas
-
 from config import settings
+
+def _get_reportlab():
+    from reportlab.lib.pagesizes import letter
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable, KeepTogether
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib import colors
+    from reportlab.pdfgen import canvas
+    return {
+        "letter": letter,
+        "SimpleDocTemplate": SimpleDocTemplate,
+        "Paragraph": Paragraph,
+        "Spacer": Spacer,
+        "Table": Table,
+        "TableStyle": TableStyle,
+        "HRFlowable": HRFlowable,
+        "KeepTogether": KeepTogether,
+        "getSampleStyleSheet": getSampleStyleSheet,
+        "ParagraphStyle": ParagraphStyle,
+        "colors": colors,
+        "canvas": canvas
+    }
 
 def clean_text_for_pdf(text: Any) -> str:
     """
@@ -62,55 +77,57 @@ def clean_text_for_pdf(text: Any) -> str:
     return text.strip()
 
 
-class NumberedCanvas(canvas.Canvas):
-    """
-    Two-pass canvas to dynamically render total page numbers and running footers.
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._saved_page_states = []
-
-    def showPage(self):
-        self._saved_page_states.append(dict(self.__dict__))
-        self._startPage()
-
-    def save(self):
-        num_pages = len(self._saved_page_states)
-        for state in self._saved_page_states:
-            self.__dict__.update(state)
-            self.draw_page_decorations(num_pages)
-            super().showPage()
-        super().save()
-
-    def draw_page_decorations(self, page_count: int):
-        self.saveState()
-        self.setFont("Helvetica", 8)
-        self.setFillColor(colors.HexColor("#64748b"))
-        
-        # Header line & text on pages after page 1
-        if self._pageNumber > 1:
-            self.drawString(36, 762, "MedVerify AI — Medical Device TRF Evaluation Report")
-            self.drawRightString(576, 762, f"Date: {datetime.now().strftime('%Y-%m-%d')}")
-            self.setStrokeColor(colors.HexColor("#cbd5e1"))
-            self.setLineWidth(0.5)
-            self.line(36, 754, 576, 754)
-            
-        # Footer
-        self.setStrokeColor(colors.HexColor("#cbd5e1"))
-        self.setLineWidth(0.5)
-        self.line(36, 36, 576, 36)
-        
-        footer_left = "PROTOTYPE DECISION-SUPPORT REPORT  |  NOT FOR REGULATORY CERTIFICATION"
-        footer_right = f"Page {self._pageNumber} of {page_count}"
-        self.drawString(36, 24, footer_left)
-        self.drawRightString(576, 24, footer_right)
-        
-        self.restoreState()
-
-
 class PDFReportGenerator:
     @staticmethod
     def generate_evaluation_pdf(evaluation_id: int, eval_data: Dict[str, Any], output_filename: str = None) -> str:
+        rl = _get_reportlab()
+        letter = rl["letter"]
+        SimpleDocTemplate = rl["SimpleDocTemplate"]
+        Paragraph = rl["Paragraph"]
+        Spacer = rl["Spacer"]
+        Table = rl["Table"]
+        TableStyle = rl["TableStyle"]
+        HRFlowable = rl["HRFlowable"]
+        KeepTogether = rl["KeepTogether"]
+        getSampleStyleSheet = rl["getSampleStyleSheet"]
+        ParagraphStyle = rl["ParagraphStyle"]
+        colors = rl["colors"]
+        canvas = rl["canvas"]
+
+        class NumberedCanvas(canvas.Canvas):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self._saved_page_states = []
+
+            def showPage(self):
+                self._saved_page_states.append(dict(self.__dict__))
+                self._startPage()
+
+            def save(self):
+                num_pages = len(self._saved_page_states)
+                for state in self._saved_page_states:
+                    self.__dict__.update(state)
+                    self.draw_page_decorations(num_pages)
+                    super().showPage()
+                super().save()
+
+            def draw_page_decorations(self, page_count: int):
+                self.saveState()
+                self.setFont("Helvetica", 8)
+                self.setFillColor(colors.HexColor("#64748b"))
+                if self._pageNumber > 1:
+                    self.drawString(36, 762, "MedVerify AI — Medical Device TRF Evaluation Report")
+                    self.drawRightString(576, 762, f"Date: {datetime.now().strftime('%Y-%m-%d')}")
+                    self.setStrokeColor(colors.HexColor("#cbd5e1"))
+                    self.setLineWidth(0.5)
+                    self.line(36, 754, 576, 754)
+                self.setStrokeColor(colors.HexColor("#cbd5e1"))
+                self.setLineWidth(0.5)
+                self.line(36, 36, 576, 36)
+                self.drawString(36, 24, "PROTOTYPE DECISION-SUPPORT REPORT  |  NOT FOR REGULATORY CERTIFICATION")
+                self.drawRightString(576, 24, f"Page {self._pageNumber} of {page_count}")
+                self.restoreState()
+
         if not output_filename:
             output_filename = f"MedVerify_TRF_Evaluation_Report_{evaluation_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
 
