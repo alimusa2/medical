@@ -1,13 +1,25 @@
+import sys
 import os
+
+# Ensure backend directory is in sys.path before any sibling imports
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from database import engine, Base, SessionLocal
-from seed_data import seed_database
-from config import settings
-
-from routers import documents, evaluations, standards, reports, certifier, settings as settings_router, samples
+try:
+    from database import engine, Base, SessionLocal
+    from seed_data import seed_database
+    from config import settings
+    from routers import documents, evaluations, standards, reports, certifier, settings as settings_router, samples
+except ImportError:
+    from backend.database import engine, Base, SessionLocal
+    from backend.seed_data import seed_database
+    from backend.config import settings
+    from backend.routers import documents, evaluations, standards, reports, certifier, settings as settings_router, samples
 
 # Initialize database schema safely
 try:

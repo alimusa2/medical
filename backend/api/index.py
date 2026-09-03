@@ -2,11 +2,12 @@ import sys
 import os
 import traceback
 
-# Ensure sys.path includes backend and api directories
+# Ensure backend directory and root directory are in sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
+backend_dir = os.path.dirname(current_dir)
+root_dir = os.path.dirname(backend_dir)
 
-for d in [current_dir, parent_dir]:
+for d in [backend_dir, root_dir, current_dir]:
     if os.path.exists(d) and d not in sys.path:
         sys.path.insert(0, d)
 
@@ -14,7 +15,8 @@ for d in [current_dir, parent_dir]:
 os.environ["VERCEL"] = "1"
 
 try:
-    from main import app
+    import main
+    app = main.app
 except Exception as e:
     err_msg = str(e)
     err_trace = traceback.format_exc()
