@@ -542,13 +542,24 @@ def seed_all_15_demo_evaluations(db: Session):
         # Run Evaluation Engine
         overall_status, item_results, counts, meta = EvaluationEngine.evaluate_trf(db, norm_trf)
 
-        # Generate AI Summary Schema
-        ai_summary_obj = AIService.generate_evaluation_summary(
-            device_name=cat_info['name'],
-            model_name=model,
-            standards_str=cat_info['particular_standard'],
-            results_list=item_results,
-            overall_status=overall_status
+        # Generate Instant Fast AI Summary Schema for Seeding
+        failed_items = [t["test_name"] for t in tests_data if t.get("result") == "FAIL" or "EXCEEDS" in str(t.get("evidence", ""))]
+        review_items = [t["test_name"] for t in tests_data if t.get("result") == "UNRECORDED" or "MISSING" in str(t.get("evidence", ""))]
+        passed_count = len(tests_data) - len(failed_items) - len(review_items)
+        
+        ai_summary_obj = AISummarySchema(
+            summary=f"The {cat_info['name']} (Model: {model}) evaluation completed with status: {overall_status}. "
+                    f"A total of {len(tests_data)} test parameters were evaluated against standard {cat_info['particular_standard']}.",
+            key_findings=[
+                f"Device: {cat_info['name']} (Model: {model})",
+                f"Applicable Standard: {cat_info['particular_standard']}",
+                f"Passed Tests: {passed_count}",
+                f"Failed Parameters: {len(failed_items)}",
+                f"Items Requiring Technical Review: {len(review_items)}"
+            ],
+            failed_items=failed_items,
+            review_items=review_items,
+            recommendation="Technical reviewer / certifier inspection required prior to final regulatory determination."
         )
 
         batch_id = f"BATCH-DEMO-{idx:02d}"
@@ -610,10 +621,6 @@ def seed_all_15_demo_evaluations(db: Session):
             db.add(res_rec)
 
         db.commit()
-
-        # Generate PDF report for demo evaluation
-        from routers.evaluations import _create_pdf_report
-        _create_pdf_report(eval_rec, db)
 
     print("Successfully seeded 15 synthetic medical device TRFs and evaluations into SQLite database.")
 
