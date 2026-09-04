@@ -72,15 +72,22 @@ for p1, p2, p3, r in router_configs:
 
 
 
-# Vercel Path Rewrite Middleware (restores original request path from Vercel headers)
+# Vercel Path Rewrite Middleware (restores original request path from Vercel query string/headers)
 @app.middleware("http")
 async def vercel_path_rewrite_middleware(request, call_next):
-    original_path = request.headers.get("x-matched-path") or request.headers.get("x-forwarded-uri")
-    if original_path and original_path != request.url.path:
-        clean_path = original_path.split("?")[0]
-        request.scope["path"] = clean_path
-    response = await call_next(request)
-    return response
+    q_path = request.query_params.get("path")
+    matched_header = request.headers.get("x-matched-path")
+    
+    real_path = None
+    if q_path:
+        real_path = "/" + q_path.lstrip("/")
+    elif matched_header and matched_header not in ["/api/index.py", "/", "/index.py"]:
+        real_path = matched_header
+
+    if real_path:
+        request.scope["path"] = real_path
+
+    return await call_next(request)
 
 @app.get("/")
 @app.get("/api")
