@@ -9,12 +9,17 @@ export default function ReportsPage() {
 
   useEffect(() => {
     reportsApi.list()
-      .then(res => setReports(res.data || []))
-      .catch(err => console.error(err))
+      .then(res => setReports(Array.isArray(res.data) ? res.data : []))
+      .catch(err => {
+        console.error(err);
+        setReports([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredReports = reports.filter(r => {
+  const safeReports = Array.isArray(reports) ? reports : [];
+  const filteredReports = safeReports.filter(r => {
+    if (!r) return false;
     const q = searchTerm.toLowerCase();
     return !q || (r.filename && r.filename.toLowerCase().includes(q));
   });

@@ -47,11 +47,14 @@ export default function Dashboard() {
         documentApi.list(),
         samplesApi.list()
       ]);
-      setEvaluations(evalRes.data || []);
-      setDocuments(docRes.data || []);
-      setSamples(sampleRes.data || []);
+      setEvaluations(Array.isArray(evalRes.data) ? evalRes.data : []);
+      setDocuments(Array.isArray(docRes.data) ? docRes.data : []);
+      setSamples(Array.isArray(sampleRes.data) ? sampleRes.data : []);
     } catch (err) {
       console.error("Failed to load dashboard data:", err);
+      setEvaluations([]);
+      setDocuments([]);
+      setSamples([]);
     } finally {
       setLoading(false);
     }
@@ -73,10 +76,14 @@ export default function Dashboard() {
     }
   };
 
-  const totalEvals = evaluations.length;
-  const passedEvals = evaluations.filter(e => e.overall_status === 'PASS').length;
-  const failedEvals = evaluations.filter(e => e.overall_status === 'FAIL').length;
-  const needsReviewEvals = evaluations.filter(e => e.overall_status === 'NEEDS REVIEW').length;
+  const safeEvals = Array.isArray(evaluations) ? evaluations : [];
+  const safeDocs = Array.isArray(documents) ? documents : [];
+  const safeSamples = Array.isArray(samples) ? samples : [];
+
+  const totalEvals = safeEvals.length;
+  const passedEvals = safeEvals.filter(e => e && e.overall_status === 'PASS').length;
+  const failedEvals = safeEvals.filter(e => e && e.overall_status === 'FAIL').length;
+  const needsReviewEvals = safeEvals.filter(e => e && e.overall_status === 'NEEDS REVIEW').length;
 
   const pieData = [
     { name: 'PASS', value: passedEvals, color: '#10b981' },
@@ -86,7 +93,8 @@ export default function Dashboard() {
 
   // Group evaluations by device category
   const categoryCounts = {};
-  evaluations.forEach(e => {
+  safeEvals.forEach(e => {
+    if (!e) return;
     const cat = e.device_type_name || 'Medical Equipment';
     categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
   });
@@ -160,7 +168,7 @@ export default function Dashboard() {
         <MetricsCard title="Passed" value={passedEvals} icon={CheckCircle2} color="emerald" subtext="Satisfied criteria" />
         <MetricsCard title="Failed" value={failedEvals} icon={XCircle} color="rose" subtext="Exceeded thresholds" />
         <MetricsCard title="Needs Review" value={needsReviewEvals} icon={AlertTriangle} color="amber" subtext="Evidence missing / incomplete" />
-        <MetricsCard title="Processed Documents" value={documents.length || totalEvals} icon={FileText} color="sky" subtext="PDF, CSV, XLSX, DOCX" />
+        <MetricsCard title="Processed Documents" value={safeDocs.length || totalEvals} icon={FileText} color="sky" subtext="PDF, CSV, XLSX, DOCX" />
       </div>
 
       {/* Demonstration Synthetic TRF Library (15 Medical Devices Grid) */}
@@ -181,7 +189,7 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-          {samples.map((s, idx) => {
+          {safeSamples.map((s, idx) => {
             const devStyle = getDeviceIcon(s.filename);
             const DevIcon = devStyle.icon;
 

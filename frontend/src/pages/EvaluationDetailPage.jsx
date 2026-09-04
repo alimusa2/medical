@@ -82,10 +82,11 @@ export default function EvaluationDetailPage() {
     }
   };
 
-  const results = evaluation.results || [];
-  const uniqueStandards = Array.from(new Set(results.map(r => r.standard_code).filter(Boolean)));
+  const results = Array.isArray(evaluation?.results) ? evaluation.results : [];
+  const uniqueStandards = Array.from(new Set(results.map(r => r?.standard_code).filter(Boolean)));
 
   const filteredResults = results.filter(r => {
+    if (!r) return false;
     const statusMatch = activeFilter === 'ALL' || r.status === activeFilter;
     const stdMatch = activeStandardFilter === 'ALL' || r.standard_code === activeStandardFilter;
     return statusMatch && stdMatch;

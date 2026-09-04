@@ -12,12 +12,17 @@ export default function EvaluationsPage() {
 
   useEffect(() => {
     evaluationApi.list()
-      .then(res => setEvaluations(res.data || []))
-      .catch(err => console.error(err))
+      .then(res => setEvaluations(Array.isArray(res.data) ? res.data : []))
+      .catch(err => {
+        console.error(err);
+        setEvaluations([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredEvals = evaluations.filter(e => {
+  const safeEvals = Array.isArray(evaluations) ? evaluations : [];
+  const filteredEvals = safeEvals.filter(e => {
+    if (!e) return false;
     const statusMatch = filter === 'ALL' || e.overall_status === filter;
     const q = searchTerm.toLowerCase();
     const searchMatch = !q || 

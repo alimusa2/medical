@@ -27,8 +27,11 @@ export default function CertifierPage() {
   const loadData = () => {
     setLoading(true);
     certifierApi.getAll('ALL')
-      .then(res => setEvaluations(res.data || []))
-      .catch(err => console.error(err))
+      .then(res => setEvaluations(Array.isArray(res.data) ? res.data : []))
+      .catch(err => {
+        console.error(err);
+        setEvaluations([]);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -54,15 +57,18 @@ export default function CertifierPage() {
     loadData();
   };
 
+  const safeEvals = Array.isArray(evaluations) ? evaluations : [];
+
   // Counts for tabs
-  const pendingCount = evaluations.filter(e => e.certifier_status === 'PENDING_REVIEW').length;
-  const approvedCount = evaluations.filter(e => e.certifier_status === 'APPROVED').length;
-  const infoRequestedCount = evaluations.filter(e => e.certifier_status === 'NEEDS_MORE_INFO').length;
-  const rejectedCount = evaluations.filter(e => e.certifier_status === 'REJECTED').length;
-  const totalCount = evaluations.length;
+  const pendingCount = safeEvals.filter(e => e && e.certifier_status === 'PENDING_REVIEW').length;
+  const approvedCount = safeEvals.filter(e => e && e.certifier_status === 'APPROVED').length;
+  const infoRequestedCount = safeEvals.filter(e => e && e.certifier_status === 'NEEDS_MORE_INFO').length;
+  const rejectedCount = safeEvals.filter(e => e && e.certifier_status === 'REJECTED').length;
+  const totalCount = safeEvals.length;
 
   // Filter evaluations based on activeTab and searchTerm
-  const filtered = evaluations.filter(e => {
+  const filtered = safeEvals.filter(e => {
+    if (!e) return false;
     const matchStatus = activeTab === 'ALL' || e.certifier_status === activeTab;
     const q = searchTerm.toLowerCase();
     const matchSearch = !q || 

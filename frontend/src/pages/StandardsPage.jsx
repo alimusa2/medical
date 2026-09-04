@@ -11,14 +11,22 @@ export default function StandardsPage() {
   useEffect(() => {
     Promise.all([standardsApi.listStandards(), standardsApi.listRequirements()])
       .then(([stdRes, reqRes]) => {
-        setStandards(stdRes.data || []);
-        setRequirements(reqRes.data || []);
+        setStandards(Array.isArray(stdRes.data) ? stdRes.data : []);
+        setRequirements(Array.isArray(reqRes.data) ? reqRes.data : []);
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+        console.error(err);
+        setStandards([]);
+        setRequirements([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredReqs = requirements.filter(r => {
+  const safeReqs = Array.isArray(requirements) ? requirements : [];
+  const safeStds = Array.isArray(standards) ? standards : [];
+
+  const filteredReqs = safeReqs.filter(r => {
+    if (!r) return false;
     const q = searchTerm.toLowerCase();
     return !q || 
       (r.requirement_code && r.requirement_code.toLowerCase().includes(q)) ||
@@ -62,7 +70,7 @@ export default function StandardsPage() {
 
       {/* Standards List Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {standards.map((s) => (
+        {safeStds.map((s) => (
           <div key={s.id} className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-2 hover:shadow-md transition">
             <div className="flex items-center justify-between">
               <span className="font-mono text-sm font-bold text-indigo-600">{s.name}</span>
