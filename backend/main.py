@@ -152,13 +152,17 @@ async def vercel_catchall_handler(request: Request, full_path: str = ""):
         from routers.documents import upload_document
         db = SessionLocal()
         try:
-            form = await request.form()
-            file = form.get("file")
+            try:
+                form = await request.form()
+                file = form.get("file")
+            except Exception:
+                file = None
+
             if file:
                 return await upload_document(file=file, db=db)
             else:
                 from fastapi import HTTPException
-                raise HTTPException(status_code=400, detail="No file found in upload request form")
+                raise HTTPException(status_code=400, detail="Please upload a TRF file using multipart form-data")
         finally:
             db.close()
 
