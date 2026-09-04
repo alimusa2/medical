@@ -21,15 +21,16 @@ class VercelPathRewriteASGI:
         if scope["type"] == "http":
             query_string = scope.get("query_string", b"").decode("utf-8")
             qs = parse_qs(query_string)
-            path_param = qs.get("path", [None])[0]
+            path_param = qs.get("__path__", [None])[0] or qs.get("path", [None])[0]
 
-            if path_param:
-                scope["path"] = "/" + path_param.lstrip("/")
-            else:
-                headers = dict(scope.get("headers", []))
-                matched_header = headers.get(b"x-matched-path", b"").decode("utf-8")
-                if matched_header and matched_header not in ["/api/index.py", "/", "/index.py"]:
-                    scope["path"] = matched_header
+            headers = dict(scope.get("headers", []))
+            forwarded_uri = headers.get(b"x-forwarded-uri", b"").decode("utf-8")
+            original_url = headers.get(b"x-original-url", b"").decode("utf-8")
+
+            real_path = path_param or forwarded_uri or original_url
+            if real_path:
+                clean_path = real_path.split("?")[0]
+                scope["path"] = "/" + clean_path.lstrip("/")
 
         await self.app(scope, receive, send)
 
