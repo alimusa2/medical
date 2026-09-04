@@ -72,11 +72,19 @@ for p1, p2, p3, r in router_configs:
 
 
 
+# Vercel Path Rewrite Middleware (restores original request path from Vercel headers)
+@app.middleware("http")
+async def vercel_path_rewrite_middleware(request, call_next):
+    original_path = request.headers.get("x-matched-path") or request.headers.get("x-forwarded-uri")
+    if original_path and original_path != request.url.path:
+        clean_path = original_path.split("?")[0]
+        request.scope["path"] = clean_path
+    response = await call_next(request)
+    return response
+
 @app.get("/")
 @app.get("/api")
 @app.get("/api/")
-@app.get("/api/index.py")
-@app.get("/index.py")
 def root():
     return {
         "app": "MedVerify AI",
