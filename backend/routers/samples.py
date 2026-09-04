@@ -13,7 +13,7 @@ from services.ai_service import AIService
 from models import Evaluation, EvaluationResult
 import uuid
 
-router = APIRouter(prefix="/api/samples", tags=["samples"])
+router = APIRouter(tags=["samples"])
 
 @router.get("")
 def list_sample_trfs(db: Session = Depends(get_db)):

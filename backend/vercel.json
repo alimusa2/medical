@@ -1,6 +1,11 @@
 {
   "version": 2,
-  "buildCommand": "echo Backend build ready",
+  "functions": {
+    "api/*.py": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -12,3 +17,4 @@
     }
   ]
 }
+

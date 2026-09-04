@@ -5,7 +5,7 @@ from config import settings
 from services.ai_service import AIService
 from seed_data import seed_database
 
-router = APIRouter(prefix="/api/settings", tags=["settings"])
+router = APIRouter(tags=["settings"])
 
 @router.get("/status")
 def get_system_status(db: Session = Depends(get_db)):

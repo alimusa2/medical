@@ -51,14 +51,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include API Routers
-app.include_router(documents.router)
-app.include_router(evaluations.router)
-app.include_router(standards.router)
-app.include_router(reports.router)
-app.include_router(certifier.router)
-app.include_router(settings_router.router)
-app.include_router(samples.router)
+# Include API Routers (register under both /api and root prefixes for serverless flexibility)
+router_configs = [
+    ("/api/documents", "/documents", documents.router),
+    ("/api/evaluations", "/evaluations", evaluations.router),
+    ("/api/standards", "/standards", standards.router),
+    ("/api/reports", "/reports", reports.router),
+    ("/api/certifier", "/certifier", certifier.router),
+    ("/api/settings", "/settings", settings_router.router),
+    ("/api/samples", "/samples", samples.router),
+]
+
+for p1, p2, r in router_configs:
+    app.include_router(r, prefix=p1)
+    app.include_router(r, prefix=p2)
+
+
+
 
 @app.get("/")
 @app.get("/api")

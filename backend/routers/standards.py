@@ -6,7 +6,7 @@ from database import get_db
 from models import Standard, Requirement, DeviceType
 from schemas import StandardSchema, RequirementSchema, DeviceTypeSchema
 
-router = APIRouter(prefix="/api/standards", tags=["standards"])
+router = APIRouter(tags=["standards"])
 
 @router.get("", response_model=List[StandardSchema])
 def list_standards(db: Session = Depends(get_db)):

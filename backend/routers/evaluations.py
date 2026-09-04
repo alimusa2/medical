@@ -12,7 +12,7 @@ from services.evaluation_engine import EvaluationEngine
 from services.ai_service import AIService
 from services.report_generator import PDFReportGenerator
 
-router = APIRouter(prefix="/api/evaluations", tags=["evaluations"])
+router = APIRouter(tags=["evaluations"])
 
 @router.get("", response_model=List[EvaluationSchema])
 def list_evaluations(db: Session = Depends(get_db)):

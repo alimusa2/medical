@@ -6,7 +6,7 @@ from database import get_db
 from models import Evaluation
 from schemas import EvaluationSchema, CertifierActionRequest
 
-router = APIRouter(prefix="/api/certifier", tags=["certifier"])
+router = APIRouter(tags=["certifier"])
 
 @router.get("/pending", response_model=List[EvaluationSchema])
 def get_pending_certifications(db: Session = Depends(get_db)):

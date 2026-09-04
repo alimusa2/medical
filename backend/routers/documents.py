@@ -11,7 +11,7 @@ from schemas import UploadedDocumentSchema
 from services.document_processor import DocumentProcessor
 from config import settings
 
-router = APIRouter(prefix="/api/documents", tags=["documents"])
+router = APIRouter(tags=["documents"])
 
 @router.post("/upload", response_model=UploadedDocumentSchema)
 async def upload_document(file: UploadFile = File(...), db: Session = Depends(get_db)):

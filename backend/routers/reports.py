@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from config import settings
 
-router = APIRouter(prefix="/api/reports", tags=["reports"])
+router = APIRouter(tags=["reports"])
 
 @router.get("")
 def list_generated_reports():
