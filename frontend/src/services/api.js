@@ -2,18 +2,15 @@ import axios from 'axios';
 
 const getApiBase = () => {
   const envUrl = import.meta.env.VITE_API_URL;
-  if (envUrl && (envUrl.startsWith('http://') || envUrl.startsWith('https://'))) {
-    return envUrl.replace(/\/$/, '');
-  }
-
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return envUrl || '/api';
+  if (envUrl && envUrl.trim() !== '') {
+    let cleanUrl = envUrl.trim().replace(/\/$/, '');
+    if ((cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) && !cleanUrl.endsWith('/api')) {
+      cleanUrl = `${cleanUrl}/api`;
     }
+    return cleanUrl;
   }
 
-  return 'https://medical-backend2.vercel.app/api';
+  return '/api';
 };
 
 const API_BASE = getApiBase();

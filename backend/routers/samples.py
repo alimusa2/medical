@@ -13,11 +13,20 @@ from services.ai_service import AIService
 from models import Evaluation, EvaluationResult
 import uuid
 
+try:
+    from seed_data import demo_scenarios
+except ImportError:
+    from backend.seed_data import demo_scenarios
+
 router = APIRouter(tags=["samples"])
 
 @router.get("")
+@router.get("/")
 def list_sample_trfs(db: Session = Depends(get_db)):
-    from seed_data import demo_scenarios
+    try:
+        from seed_data import demo_scenarios
+    except ImportError:
+        from backend.seed_data import demo_scenarios
     samples = []
     os.makedirs(settings.SAMPLE_DIR, exist_ok=True)
     

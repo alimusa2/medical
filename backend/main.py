@@ -42,14 +42,55 @@ app = FastAPI(
     version="1.0.0"
 )
 
+from starlette.types import ASGIApp, Scope, Receive, Send
+from urllib.parse import parse_qs
+
+class VercelPathRewriteASGIMiddleware:
+    def __init__(self, app: ASGIApp):
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send):
+        if scope["type"] == "http":
+            query_string = scope.get("query_string", b"").decode("utf-8", errors="ignore")
+            qs = parse_qs(query_string)
+            
+            q_path = None
+            if "__path__" in qs and qs["__path__"]:
+                q_path = qs["__path__"][0]
+            elif "path" in qs and qs["path"]:
+                q_path = qs["path"][0]
+
+            headers = dict(scope.get("headers", []))
+            x_uri = headers.get(b"x-forwarded-uri", b"").decode("utf-8", errors="ignore")
+            x_match = headers.get(b"x-matched-path", b"").decode("utf-8", errors="ignore")
+
+            matched_header = None
+            for h in [x_uri, x_match]:
+                if h and h not in ["/api/index.py", "/index.py", "/", "/api", "/api/"]:
+                    matched_header = h
+                    break
+
+            real_path = None
+            if q_path:
+                real_path = "/" + q_path.lstrip("/")
+            elif matched_header:
+                real_path = "/" + matched_header.lstrip("/")
+
+            if real_path and real_path not in ["/api/index.py", "/index.py"]:
+                scope["path"] = real_path
+
+        await self.app(scope, receive, send)
+
 # Configure CORS for frontend Vite dev server
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(VercelPathRewriteASGIMiddleware)
 
 from fastapi import Request, Depends
 from sqlalchemy.orm import Session
@@ -125,38 +166,6 @@ for p1, p2, r in routers:
     app.include_router(r, prefix=p1)
     app.include_router(r, prefix=p2)
 
-
-
-
-
-
-# Vercel Path Rewrite Middleware (restores original request path from Vercel query string/headers)
-@app.middleware("http")
-async def vercel_path_rewrite_middleware(request, call_next):
-    q_path = request.query_params.get("path")
-    matched_header = request.headers.get("x-matched-path")
-    
-    real_path = None
-    if q_path:
-        real_path = "/" + q_path.lstrip("/")
-    elif matched_header and matched_header not in ["/api/index.py", "/", "/index.py"]:
-        real_path = matched_header
-
-    if real_path:
-        request.scope["path"] = real_path
-
-    if request.scope.get("path") in ["/debug-routes", "/api/debug-routes"]:
-        from starlette.responses import JSONResponse
-        return JSONResponse({
-            "method": request.method,
-            "raw_path": request.url.path,
-            "scope_path": request.scope.get("path"),
-            "headers": {k.decode("latin1"): v.decode("latin1") for k, v in request.scope.get("headers", [])},
-            "routes": [getattr(r, "path", str(r)) for r in app.routes]
-        })
-
-    return await call_next(request)
-
 from starlette.routing import Match
 from fastapi import Request
 
@@ -171,10 +180,34 @@ async def vercel_catchall_handler(request: Request, full_path: str = ""):
     target_path = q_path or matched_header or full_path or request.url.path
     clean_target = "/" + target_path.lstrip("/")
 
-    # 1. Document Upload Direct Route
+    # 1. Samples Direct Route
+    if "samples" in clean_target:
+        from database import SessionLocal
+        try:
+            from routers.samples import list_sample_trfs, download_sample_trf, run_sample_evaluation
+        except ImportError:
+            from backend.routers.samples import list_sample_trfs, download_sample_trf, run_sample_evaluation
+        
+        db = SessionLocal()
+        try:
+            if "download" in clean_target and request.method in ["GET", "HEAD"]:
+                filename = clean_target.split("/")[-1]
+                return download_sample_trf(filename=filename, db=db)
+            elif "run-sample" in clean_target and request.method in ["POST", "OPTIONS"]:
+                filename = clean_target.split("/")[-1]
+                return run_sample_evaluation(filename=filename, db=db)
+            elif request.method in ["GET", "HEAD"]:
+                return list_sample_trfs(db=db)
+        finally:
+            db.close()
+
+    # 2. Document Upload & List Direct Route
     if "upload" in clean_target and request.method in ["POST", "OPTIONS"]:
         from database import SessionLocal
-        from routers.documents import upload_document
+        try:
+            from routers.documents import upload_document
+        except ImportError:
+            from backend.routers.documents import upload_document
         db = SessionLocal()
         try:
             try:
@@ -191,21 +224,39 @@ async def vercel_catchall_handler(request: Request, full_path: str = ""):
         finally:
             db.close()
 
-    # 2. Run Evaluation Direct Route
-    if "evaluations" in clean_target and "run" in clean_target and request.method in ["POST", "OPTIONS"]:
+    if "documents" in clean_target and request.method in ["GET", "HEAD"]:
         from database import SessionLocal
-        from routers.evaluations import run_evaluation
+        try:
+            from routers.documents import list_documents
+        except ImportError:
+            from backend.routers.documents import list_documents
         db = SessionLocal()
         try:
-            import re
-            m = re.search(r"document/(\d+)/run", clean_target)
-            if m:
-                doc_id = int(m.group(1))
-                return run_evaluation(doc_id=doc_id, db=db)
+            return list_documents(db=db)
         finally:
             db.close()
 
-    # 3. Default Root Info Response
+    # 3. Run Evaluation & List Direct Route
+    if "evaluations" in clean_target:
+        from database import SessionLocal
+        try:
+            from routers.evaluations import run_evaluation, list_evaluations
+        except ImportError:
+            from backend.routers.evaluations import run_evaluation, list_evaluations
+        db = SessionLocal()
+        try:
+            if "run" in clean_target and request.method in ["POST", "OPTIONS"]:
+                import re
+                m = re.search(r"document/(\d+)/run", clean_target)
+                if m:
+                    doc_id = int(m.group(1))
+                    return run_evaluation(doc_id=doc_id, db=db)
+            elif request.method in ["GET", "HEAD"]:
+                return list_evaluations(db=db)
+        finally:
+            db.close()
+
+    # 4. Default Root Info Response
     return {
         "app": "MedVerify AI",
         "status": "online",

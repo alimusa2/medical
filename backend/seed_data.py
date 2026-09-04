@@ -78,362 +78,369 @@ def seed_all_15_demo_evaluations(db: Session):
     os.makedirs(sample_dir, exist_ok=True)
     os.makedirs(upload_dir, exist_ok=True)
 
-    # 15 Specific Demonstration Devices & Comprehensive Real-World IEC Test Scenarios
-    demo_scenarios = [
-        {
-            "cat_key": "Blood Pressure Monitor",
-            "model": "BP-100",
-            "mfr": "CardioTech Medical Systems",
-            "serial": "SN-BP-1001",
-            "report_num": "TRF-2026-BP01",
-            "expected_outcome": "PASS",
-            "tests": [
-                {"test_name": "Leakage Current", "result": 0.22, "unit": "mA", "evidence": "Earth leakage 0.22 mA recorded under 230V normal condition (limit <= 0.5 mA)"},
-                {"test_name": "Insulation Resistance", "result": 100.0, "unit": "MΩ", "evidence": "500V DC applied, 100 MΩ measured (limit >= 20 MΩ)"},
-                {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "1500V AC 50Hz applied for 60s without breakdown"},
-                {"test_name": "Temperature", "result": 37.5, "unit": "°C", "evidence": "Maximum enclosure surface thermal probe reading (limit <= 41.0 °C)"},
-                {"test_name": "Patient Leakage Current", "result": 0.02, "unit": "mA", "evidence": "Direct patient cuff leakage 0.02 mA (limit <= 0.05 mA)"},
-                {"test_name": "BP Measurement Accuracy", "result": 1.5, "unit": "mmHg", "evidence": "Static pressure calibration bias 1.5 mmHg (limit <= 3.0 mmHg)"},
-                {"test_name": "Overpressure Safety Cutoff", "result": 285.0, "unit": "mmHg", "evidence": "Automatic pressure relief valve activated at 285 mmHg (limit <= 300 mmHg)"},
-                {"test_name": "Cuff Pressure Transducer Accuracy", "result": 1.0, "unit": "mmHg", "evidence": "Pressure linearity error 1.0 mmHg"},
-                {"test_name": "EMC Immunity", "result": "PASS", "unit": "-", "evidence": "8kV air / 6kV contact ESD immunity satisfied per IEC 60601-1-2"},
-                {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Auditory alarm sound pressure 70 dBA measured per IEC 60601-1-8"},
-                {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Summative usability evaluation complete per IEC 62366-1"},
-                {"test_name": "Risk Management", "result": "PASS", "evidence": "ISO 14971 risk management file audit verified"},
-                {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "IEC 62304 Class B firmware verification & validation passed"},
-                {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Rating plate & CE mark verified"}
-            ]
-        },
-        {
-            "cat_key": "ECG / Electrocardiograph",
-            "model": "ECG-1200",
-            "mfr": "BioSignal Instruments",
-            "serial": "SN-ECG-992",
-            "report_num": "TRF-2026-ECG02",
-            "expected_outcome": "FAIL",
-            "tests": [
-                {"test_name": "Leakage Current", "result": 0.18, "unit": "mA", "evidence": "Earth leakage current normal condition"},
-                {"test_name": "Insulation Resistance", "result": 85.0, "unit": "MΩ", "evidence": "Mains supply insulation OK"},
-                {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "4000V high voltage insulation test satisfied"},
-                {"test_name": "Temperature", "result": 36.2, "unit": "°C", "evidence": "Enclosure surface temp 36.2 °C"},
-                {"test_name": "Patient Leakage Current", "result": 0.08, "unit": "mA", "evidence": "Direct patient lead auxiliary current 0.08 mA - EXCEEDS LIMIT (<= 0.05 mA)"},
-                {"test_name": "Defibrillator Discharge Test", "result": "PASS", "evidence": "Post 5kV energy recovery verified per IEC 60601-2-25"},
-                {"test_name": "ECG Frequency Bandwidth", "result": 160.0, "unit": "Hz", "evidence": "3dB frequency bandwidth 0.05 - 160 Hz"},
-                {"test_name": "Pacemaker Pulse Suppression", "result": "PASS", "evidence": "Rejection of 2mV pacemaker pulse confirmed"},
-                {"test_name": "EMC Immunity", "result": "PASS", "evidence": "Radiated RF field immunity 10 V/m satisfied"},
-                {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Lead-off visual & auditory alarm 74 dBA"},
-                {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Lead color coding usability verified"},
-                {"test_name": "Risk Management", "result": "PASS", "evidence": "ISO 14971 risk management file verified"},
-                {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "ECG rhythm analysis algorithm verified per IEC 62304"},
-                {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Defibrillator proof warning label present"}
-            ]
-        },
-        {
-            "cat_key": "Patient Monitor",
-            "model": "PM-800",
-            "mfr": "OmniCare Diagnostics",
-            "serial": "SN-PM-8840",
-            "report_num": "TRF-2026-PM03",
-            "expected_outcome": "NEEDS REVIEW",
-            "tests": [
-                {"test_name": "Leakage Current", "result": 0.29, "unit": "mA", "evidence": "Normal condition earth leakage"},
-                {"test_name": "Insulation Resistance", "result": 120.0, "unit": "MΩ", "evidence": "Primary isolation 120 MΩ"},
-                {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "4500V dielectric breakdown check satisfied"},
-                {"test_name": "Temperature", "result": 38.1, "unit": "°C", "evidence": "Enclosure surface temp 38.1 °C"},
-                {"test_name": "Patient Leakage Current", "result": 0.03, "unit": "mA", "evidence": "Patient auxiliary leakage 0.03 mA"},
-                {"test_name": "Channel Isolation", "result": 4000.0, "unit": "V", "evidence": "High voltage channel isolation verified"},
-                {"test_name": "Waveform Display Latency", "result": 65.0, "unit": "ms", "evidence": "Real-time sweep rendering latency 65 ms"},
-                {"test_name": "EMC Immunity", "result": "PASS", "evidence": "10 V/m RF field immunity satisfied"},
-                {"test_name": "Alarm Priority", "result": "UNRECORDED", "evidence": "Auditory alarm sound pressure level missing in test records section 3"},
-                {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Display layout & touch screen usability validated"},
-                {"test_name": "Risk Management", "result": "PASS", "evidence": "ISO 14971 risk management file verified"},
-                {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Multi-parameter software verification complete"},
-                {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Rating plate & CE markings present"}
-            ]
-        },
-        {
-            "cat_key": "Infusion Pump",
-            "model": "IP-500",
-            "mfr": "FluidCare Medical Equipment",
-            "serial": "SN-IP-5011",
-            "report_num": "TRF-2026-IP04",
-            "expected_outcome": "FAIL",
-            "tests": [
-                {"test_name": "Leakage Current", "result": 0.31, "unit": "mA", "evidence": "Standard enclosure leakage test"},
-                {"test_name": "Insulation Resistance", "result": 110.0, "unit": "MΩ", "evidence": "Mains supply insulation 110 MΩ"},
-                {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "3000V high voltage isolation check"},
-                {"test_name": "Temperature", "result": 39.2, "unit": "°C", "evidence": "Motor housing surface temp 39.2 °C"},
-                {"test_name": "Patient Leakage Current", "result": 0.02, "unit": "mA", "evidence": "Patient lead leakage 0.02 mA"},
-                {"test_name": "Flow Delivery Accuracy", "result": 2.1, "unit": "%", "evidence": "Volumetric delivery rate error 2.1% (limit <= 5.0%)"},
-                {"test_name": "Occlusion Pressure Limit", "result": 135.0, "unit": "kPa", "evidence": "Downstream occlusion pressure 135 kPa - EXCEEDS SAFETY LIMIT (<= 100 kPa)"},
-                {"test_name": "Air Bubble Detection", "result": 35.0, "unit": "µL", "evidence": "Ultrasonic air sensor trigger 35 µL"},
-                {"test_name": "EMC Immunity", "result": "PASS", "evidence": "Conducted disturbances immunity satisfied"},
-                {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Red high priority occlusion alarm 78 dBA"},
-                {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Dosing unit input usability validated"},
-                {"test_name": "Risk Management", "result": "PASS", "evidence": "Infusion risk hazard analysis verified"},
-                {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Pump motor control software Class C verified"},
-                {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Flow direction markings present"}
-            ]
-        },
-        {
-            "cat_key": "Infusion Syringe Pump",
-            "model": "SP-200",
-            "mfr": "FluidCare Medical Equipment",
-            "serial": "SN-SP-2004",
-            "report_num": "TRF-2026-SP05",
-            "expected_outcome": "PASS",
-            "tests": [
-                {"test_name": "Leakage Current", "result": 0.25, "unit": "mA", "evidence": "Enclosure leakage test 0.25 mA"},
-                {"test_name": "Insulation Resistance", "result": 95.0, "unit": "MΩ", "evidence": "Mains insulation test 95 MΩ"},
-                {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "3000V high voltage isolation satisfied"},
-                {"test_name": "Temperature", "result": 36.8, "unit": "°C", "evidence": "Enclosure surface temp 36.8 °C"},
-                {"test_name": "Patient Leakage Current", "result": 0.01, "unit": "mA", "evidence": "Patient lead leakage 0.01 mA"},
-                {"test_name": "Syringe Barrel Fit Test", "result": "PASS", "evidence": "Optical sensor syringe size check"},
-                {"test_name": "Flow Delivery Accuracy", "result": 1.8, "unit": "%", "evidence": "Volumetric delivery accuracy 1.8%"},
-                {"test_name": "Occlusion Pressure Limit", "result": 85.0, "unit": "kPa", "evidence": "Occlusion pressure relief 85 kPa (limit <= 100 kPa)"},
-                {"test_name": "EMC Immunity", "result": "PASS", "evidence": "8kV ESD immunity satisfied"},
-                {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Syringe empty auditory alarm 72 dBA"},
-                {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Syringe loading ergonomics file verified"},
-                {"test_name": "Risk Management", "result": "PASS", "evidence": "ISO 14971 risk management file complete"},
-                {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Syringe drive firmware verification complete"},
-                {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Syringe size compatibility plate present"}
-            ]
-        },
-        {
-            "cat_key": "Ventilator",
-            "model": "V-900",
-            "mfr": "RespiTech Care Systems",
-            "serial": "SN-VENT-901",
-            "report_num": "TRF-2026-VENT06",
-            "expected_outcome": "FAIL",
-            "tests": [
-                {"test_name": "Leakage Current", "result": 0.45, "unit": "mA", "evidence": "Earth leakage 0.45 mA"},
-                {"test_name": "Insulation Resistance", "result": 75.0, "unit": "MΩ", "evidence": "Primary insulation 75 MΩ"},
-                {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "4000V high voltage check satisfied"},
-                {"test_name": "Temperature", "result": 42.1, "unit": "°C", "evidence": "Blower motor temp 42.1 °C"},
-                {"test_name": "Patient Leakage Current", "result": 0.03, "unit": "mA", "evidence": "Patient circuit leakage 0.03 mA"},
-                {"test_name": "Tidal Volume Accuracy", "result": 4.2, "unit": "%", "evidence": "Volume delivery tolerance 4.2%"},
-                {"test_name": "Max Airway Pressure", "result": 68.0, "unit": "cmH2O", "evidence": "Airway pressure cutoff 68 cmH2O - EXCEEDS LIMIT (<= 60 cmH2O)"},
-                {"test_name": "Battery Backup Operating Time", "result": 22.0, "unit": "min", "evidence": "Internal battery operating time 22 mins - BELOW MINIMUM (>= 60 min)"},
-                {"test_name": "EMC Immunity", "result": "PASS", "evidence": "10 V/m RF field immunity satisfied"},
-                {"test_name": "Alarm Priority", "result": "PASS", "evidence": "High urgency apnea alarm 82 dBA"},
-                {"test_name": "Usability Engineering", "result": "PASS", "evidence": "ICU clinical user evaluation complete"},
-                {"test_name": "Risk Management", "result": "PASS", "evidence": "Ventilator hazard mitigation file verified"},
-                {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Critical software architecture Class C verified"},
-                {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Oxygen supply inlet markings present"}
-            ]
-        },
-        {
-            "cat_key": "Defibrillator",
-            "model": "DEF-700",
-            "mfr": "LifePulse Resuscitation Tech",
-            "serial": "SN-DEF-7002",
-            "report_num": "TRF-2026-DEF07",
-            "expected_outcome": "PASS",
-            "tests": [
-                {"test_name": "Leakage Current", "result": 0.20, "unit": "mA", "evidence": "Earth leakage test 0.20 mA"},
-                {"test_name": "Insulation Resistance", "result": 150.0, "unit": "MΩ", "evidence": "Mains insulation 150 MΩ"},
-                {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "5000V paddle isolation barrier satisfied"},
-                {"test_name": "Temperature", "result": 38.9, "unit": "°C", "evidence": "Internal capacitor temp 38.9 °C"},
-                {"test_name": "Patient Leakage Current", "result": 0.02, "unit": "mA", "evidence": "Patient auxiliary leakage 0.02 mA"},
-                {"test_name": "Defibrillation Energy Accuracy", "result": 3.5, "unit": "%", "evidence": "Output energy error 3.5% at 360J"},
-                {"test_name": "Maximum Charge Time", "result": 6.2, "unit": "s", "evidence": "Capacitor charge time to max energy 6.2s (limit <= 15.0s)"},
-                {"test_name": "Internal Auto-discharge", "result": 1.1, "unit": "s", "evidence": "Safety discharge time 1.1s (limit <= 2.0s)"},
-                {"test_name": "EMC Immunity", "result": "PASS", "evidence": "Surge immunity test satisfied"},
-                {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Ready for shock audio indicator 75 dBA"},
-                {"test_name": "Usability Engineering", "result": "PASS", "evidence": "AED rescue user flow usability complete"},
-                {"test_name": "Risk Management", "result": "PASS", "evidence": "High energy discharge hazard file verified"},
-                {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Shock delivery firmware verification complete"},
-                {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Paddle energy rating & CE mark verified"}
-            ]
-        },
-        {
-            "cat_key": "Pulse Oximeter",
-            "model": "PO-50",
-            "mfr": "OptiPulse Healthcare",
-            "serial": "SN-PO-501",
-            "report_num": "TRF-2026-PO08",
-            "expected_outcome": "PASS",
-            "tests": [
-                {"test_name": "Leakage Current", "result": 0.15, "unit": "mA", "evidence": "Normal condition leakage 0.15 mA"},
-                {"test_name": "Insulation Resistance", "result": 110.0, "unit": "MΩ", "evidence": "Primary insulation 110 MΩ"},
-                {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "2500V isolation barrier check satisfied"},
-                {"test_name": "Temperature", "result": 39.1, "unit": "°C", "evidence": "Optical probe surface temp 39.1 °C (limit <= 41.0 °C)"},
-                {"test_name": "Patient Leakage Current", "result": 0.01, "unit": "mA", "evidence": "Patient probe leakage 0.01 mA"},
-                {"test_name": "SpO2 Measurement Accuracy", "result": 1.2, "unit": "%", "evidence": "RMS SpO2 accuracy deviation 1.2% per ISO 80601-2-61"},
-                {"test_name": "Pulse Rate Measurement Accuracy", "result": 1.5, "unit": "bpm", "evidence": "Pulse rate accuracy 1.5 bpm"},
-                {"test_name": "EMC Immunity", "result": "PASS", "evidence": "8kV ESD air discharge satisfied"},
-                {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Desaturation alarm signal 70 dBA"},
-                {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Probe attachment usability file complete"},
-                {"test_name": "Risk Management", "result": "PASS", "evidence": "ISO 14971 risk management file verified"},
-                {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Oximetry signal processing software verified"},
-                {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Optical probe rating label present"}
-            ]
-        },
-        {
-            "cat_key": "Electrosurgical Unit",
-            "model": "ESU-400",
-            "mfr": "SurgeTech Electrosurgery",
-            "serial": "SN-ESU-4089",
-            "report_num": "TRF-2026-ESU09",
-            "expected_outcome": "FAIL",
-            "tests": [
-                {"test_name": "Leakage Current", "result": 0.35, "unit": "mA", "evidence": "Low frequency mains leakage 0.35 mA"},
-                {"test_name": "Insulation Resistance", "result": 60.0, "unit": "MΩ", "evidence": "Primary insulation 60 MΩ"},
-                {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "3500V generator high voltage check satisfied"},
-                {"test_name": "Temperature", "result": 44.0, "unit": "°C", "evidence": "Heatsink surface temp 44.0 °C"},
-                {"test_name": "High Frequency Leakage Current", "result": 195.0, "unit": "mA", "evidence": "RF leakage at active electrode 195 mA - EXCEEDS LIMIT (<= 150 mA)"},
-                {"test_name": "CQM Neutral Plate Interlock", "result": "PASS", "evidence": "Split return plate alarm interlock verified per IEC 60601-2-2"},
-                {"test_name": "RF Output Power Limit", "result": 380.0, "unit": "W", "evidence": "Maximum RF output power 380 W at 500 ohms"},
-                {"test_name": "EMC Immunity", "result": "PASS", "evidence": "Class A RF radiated emissions satisfied"},
-                {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Neutral electrode fault alarm 80 dBA"},
-                {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Surgical foot pedal ergonomics file verified"},
-                {"test_name": "Risk Management", "result": "PASS", "evidence": "High frequency burn hazard file verified"},
-                {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Generator control software verified"},
-                {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "High frequency warning plate present"}
-            ]
-        },
-        {
-            "cat_key": "X-Ray Diagnostic Equipment",
-            "model": "XR-500",
-            "mfr": "Radiance Imaging Corp",
-            "serial": "SN-XR-5001",
-            "report_num": "TRF-2026-XR10",
-            "expected_outcome": "NEEDS REVIEW",
-            "tests": [
-                {"test_name": "Leakage Current", "result": 0.38, "unit": "mA", "evidence": "Generator cabinet earth leakage 0.38 mA"},
-                {"test_name": "Insulation Resistance", "result": 140.0, "unit": "MΩ", "evidence": "Generator insulation 140 MΩ"},
-                {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "100kV high voltage generator tank check satisfied"},
-                {"test_name": "Temperature", "result": 48.0, "unit": "°C", "evidence": "Anode thermal capacity temp 48.0 °C"},
-                {"test_name": "Radiation Collimation", "result": "PASS", "evidence": "Automatic light beam diaphragm collimation checked per IEC 60601-1-3"},
-                {"test_name": "Tube Voltage Accuracy", "result": 2.4, "unit": "%", "evidence": "kVp output accuracy 2.4% across 80-120 kV range"},
-                {"test_name": "Exposure Time Error", "result": 1.1, "unit": "%", "evidence": "Exposure timer reproducibility check 1.1%"},
-                {"test_name": "Leakage Radiation", "result": "UNRECORDED", "evidence": "Stray radiation measurement data missing in section 4"},
-                {"test_name": "EMC Immunity", "result": "PASS", "evidence": "Class A electromagnetic compatibility satisfied"},
-                {"test_name": "Alarm Priority", "result": "PASS", "evidence": "X-Ray exposure active audible warning 78 dBA"},
-                {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Operator console ergonomics complete"},
-                {"test_name": "Risk Management", "result": "PASS", "evidence": "Diagnostic radiation risk index complete"},
-                {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Exposure control system verification complete"},
-                {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Ionizing radiation warning sign present"}
-            ]
-        },
-        {
-            "cat_key": "Ultrasound Diagnostic Equipment",
-            "model": "US-300",
-            "mfr": "SonoVision Systems",
-            "serial": "SN-US-3009",
-            "report_num": "TRF-2026-US11",
-            "expected_outcome": "PASS",
-            "tests": [
-                {"test_name": "Leakage Current", "result": 0.18, "unit": "mA", "evidence": "Console leakage current 0.18 mA"},
-                {"test_name": "Insulation Resistance", "result": 180.0, "unit": "MΩ", "evidence": "Console insulation 180 MΩ"},
-                {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "3000V transducer isolation barrier check"},
-                {"test_name": "Temperature", "result": 38.5, "unit": "°C", "evidence": "Transducer face temperature steady state 38.5 °C"},
-                {"test_name": "Patient Leakage Current", "result": 0.01, "unit": "mA", "evidence": "Patient probe leakage 0.01 mA"},
-                {"test_name": "Acoustic Mechanical Index", "result": 1.2, "unit": "-", "evidence": "Peak acoustic MI 1.2 (limit <= 1.9) per IEC 60601-2-37"},
-                {"test_name": "Acoustic Thermal Index", "result": 2.1, "unit": "-", "evidence": "Doppler mode TI 2.1 (limit <= 6.0)"},
-                {"test_name": "High Voltage Pulse Stability", "result": 1.5, "unit": "%", "evidence": "Transducer drive voltage stability 1.5%"},
-                {"test_name": "EMC Immunity", "result": "PASS", "evidence": "8kV ESD & RF susceptibility satisfied"},
-                {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Thermal index limit audio warning 72 dBA"},
-                {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Sonographer console usability file verified"},
-                {"test_name": "Risk Management", "result": "PASS", "evidence": "Acoustic output risk management file complete"},
-                {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Ultrasound image processing firmware verified"},
-                {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Acoustic rating plate & CE label present"}
-            ]
-        },
-        {
-            "cat_key": "Surgical Operating Table",
-            "model": "OT-700",
-            "mfr": "SurgeTech Operating Systems",
-            "serial": "SN-OT-7005",
-            "report_num": "TRF-2026-OT12",
-            "expected_outcome": "PASS",
-            "tests": [
-                {"test_name": "Leakage Current", "result": 0.28, "unit": "mA", "evidence": "Hydraulic pump motor leakage 0.28 mA"},
-                {"test_name": "Insulation Resistance", "result": 150.0, "unit": "MΩ", "evidence": "Power supply insulation resistance 150 MΩ"},
-                {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "2000V high voltage motor insulation check"},
-                {"test_name": "Temperature", "result": 41.0, "unit": "°C", "evidence": "Hydraulic oil reservoir temp 41.0 °C"},
-                {"test_name": "Safe Working Load Capacity", "result": 300.0, "unit": "kg", "evidence": "Static load test 300 kg satisfied per IEC 60601-2-46 (limit >= 220 kg)"},
-                {"test_name": "Emergency Brake Release", "result": "PASS", "evidence": "Manual emergency foot lever verified"},
-                {"test_name": "Table Articulation Locking", "result": "PASS", "evidence": "100% mechanical lock under full load"},
-                {"test_name": "Anti-Tip Stability Margin", "result": 15.0, "unit": "deg", "evidence": "Anti-tip static margin 15.0 deg incline"},
-                {"test_name": "EMC Immunity", "result": "PASS", "evidence": "Motor drive EMC immunity satisfied"},
-                {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Battery disconnect warning signal active"},
-                {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Surgical team positioning usability file verified"},
-                {"test_name": "Risk Management", "result": "PASS", "evidence": "Patient fall risk analysis verified"},
-                {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Articulation motor control software verified"},
-                {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Rating plate & CE/FDA markings present"}
-            ]
-        },
-        {
-            "cat_key": "Medical Examination / Treatment Light",
-            "model": "SL-100",
-            "mfr": "LumiMed Lighting Tech",
-            "serial": "SN-SL-1002",
-            "report_num": "TRF-2026-SL13",
-            "expected_outcome": "PASS",
-            "tests": [
-                {"test_name": "Leakage Current", "result": 0.12, "unit": "mA", "evidence": "Luminaire head leakage 0.12 mA"},
-                {"test_name": "Insulation Resistance", "result": 200.0, "unit": "MΩ", "evidence": "Transformer insulation test 200 MΩ"},
-                {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "2500V arm mechanism wire insulation check"},
-                {"test_name": "Temperature", "result": 42.0, "unit": "°C", "evidence": "Lamp enclosure surface temp 42.0 °C"},
-                {"test_name": "Central Illuminance Lux", "result": 120000.0, "unit": "Lux", "evidence": "Measured at 1m focal distance 120000 Lux per IEC 60601-2-41 (40000 - 160000 Lux)"},
-                {"test_name": "Total Light Irradiance", "result": 450.0, "unit": "W/m²", "evidence": "Infrared heat radiation 450 W/m² (limit <= 1000 W/m²)"},
-                {"test_name": "Color Rendering Index Ra", "result": 96.0, "unit": "-", "evidence": "Color rendering index Ra 96 (limit >= 85)"},
-                {"test_name": "EMC Immunity", "result": "PASS", "evidence": "LED driver EMC emissions Class B satisfied"},
-                {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Surgical field light positioning usability complete"},
-                {"test_name": "Risk Management", "result": "PASS", "evidence": "Photobiological hazard analysis verified"},
-                {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Dimming controller firmware verification complete"},
-                {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Safety warning label & CE mark verified"}
-            ]
-        },
-        {
-            "cat_key": "Medical Laboratory / Diagnostic Electrical Equipment",
-            "model": "LA-500",
-            "mfr": "BioLab Analyzer Systems",
-            "serial": "SN-LA-5001",
-            "report_num": "TRF-2026-LA14",
-            "expected_outcome": "PASS",
-            "tests": [
-                {"test_name": "Lab Mains Insulation", "result": 45.0, "unit": "MΩ", "evidence": "IEC 61010 laboratory insulation test 45 MΩ (limit >= 20 MΩ)"},
-                {"test_name": "Enclosure Safety", "result": "PASS", "evidence": "Finger probe mechanical safety checked per IEC 61010-1"},
-                {"test_name": "Thermal Cutoff", "result": 42.0, "unit": "°C", "evidence": "Maximum component temp 42.0 °C (limit <= 55 °C)"},
-                {"test_name": "Sample Splash Guard", "result": "PASS", "evidence": "IVD specimen biological containment verified per IEC 61010-2-101"},
-                {"test_name": "Reagent Storage Temp", "result": 4.5, "unit": "°C", "evidence": "Reagent carousel temp 4.5 °C (range 2.0 - 8.0 °C)"},
-                {"test_name": "Sample Pipetting Volume Accuracy", "result": 0.8, "unit": "%", "evidence": "Pipetting volume accuracy 0.8% (limit <= 2.0%)"},
-                {"test_name": "EMC Immunity", "result": "PASS", "evidence": "Lab analyzer EMC immunity satisfied per IEC 61326-2-6"},
-                {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Reagent low & error audio tone 70 dBA"},
-                {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Lab technician user workflow validated"},
-                {"test_name": "Risk Management", "result": "PASS", "evidence": "Biohazard risk management file complete"},
-                {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Analyzer processing software Class B verified"},
-                {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Biological hazard label & rating plate present"}
-            ]
-        },
-        {
-            "cat_key": "Medical Electrical Therapy Equipment",
-            "model": "TH-300",
-            "mfr": "NeuroPulse Therapy Inc",
-            "serial": "SN-TH-3004",
-            "report_num": "TRF-2026-TH15",
-            "expected_outcome": "FAIL",
-            "tests": [
-                {"test_name": "Leakage Current", "result": 0.22, "unit": "mA", "evidence": "Earth leakage test 0.22 mA"},
-                {"test_name": "Insulation Resistance", "result": 90.0, "unit": "MΩ", "evidence": "Primary insulation 90 MΩ"},
-                {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "3000V output isolation check satisfied"},
-                {"test_name": "Temperature", "result": 38.0, "unit": "°C", "evidence": "Electrode pad surface temp 38.0 °C"},
-                {"test_name": "Patient Leakage Current", "result": 0.02, "unit": "mA", "evidence": "Patient auxiliary leakage 0.02 mA"},
-                {"test_name": "Stimulus Current Amplitude", "result": 65.0, "unit": "mA", "evidence": "Pulse amplitude 65 mA per IEC 60601-2-10 (limit <= 80 mA)"},
-                {"test_name": "DC Current Offset", "result": 0.45, "unit": "mA", "evidence": "Direct current offset 0.45 mA - EXCEEDS SAFETY LIMIT (<= 0.10 mA)"},
-                {"test_name": "Pulse Duration Accuracy", "result": 2.0, "unit": "%", "evidence": "Pulse duration accuracy 2.0%"},
-                {"test_name": "EMC Immunity", "result": "PASS", "evidence": "8kV ESD air discharge satisfied"},
-                {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Electrode disconnect audio warning 72 dBA"},
-                {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Patient electrode placement usability verified"},
-                {"test_name": "Risk Management", "result": "PASS", "evidence": "Tissue burn & direct current risk file verified"},
-                {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Stimulation pulse control firmware verified"},
-                {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "High voltage output warning plate present"}
-            ]
-        }
-    ]
+# 15 Specific Demonstration Devices & Comprehensive Real-World IEC Test Scenarios
+DEMO_SCENARIOS = [
+    {
+        "cat_key": "Blood Pressure Monitor",
+        "model": "BP-100",
+        "mfr": "CardioTech Medical Systems",
+        "serial": "SN-BP-1001",
+        "report_num": "TRF-2026-BP01",
+        "expected_outcome": "PASS",
+        "tests": [
+            {"test_name": "Leakage Current", "result": 0.22, "unit": "mA", "evidence": "Earth leakage 0.22 mA recorded under 230V normal condition (limit <= 0.5 mA)"},
+            {"test_name": "Insulation Resistance", "result": 100.0, "unit": "MΩ", "evidence": "500V DC applied, 100 MΩ measured (limit >= 20 MΩ)"},
+            {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "1500V AC 50Hz applied for 60s without breakdown"},
+            {"test_name": "Temperature", "result": 37.5, "unit": "°C", "evidence": "Maximum enclosure surface thermal probe reading (limit <= 41.0 °C)"},
+            {"test_name": "Patient Leakage Current", "result": 0.02, "unit": "mA", "evidence": "Direct patient cuff leakage 0.02 mA (limit <= 0.05 mA)"},
+            {"test_name": "BP Measurement Accuracy", "result": 1.5, "unit": "mmHg", "evidence": "Static pressure calibration bias 1.5 mmHg (limit <= 3.0 mmHg)"},
+            {"test_name": "Overpressure Safety Cutoff", "result": 285.0, "unit": "mmHg", "evidence": "Automatic pressure relief valve activated at 285 mmHg (limit <= 300 mmHg)"},
+            {"test_name": "Cuff Pressure Transducer Accuracy", "result": 1.0, "unit": "mmHg", "evidence": "Pressure linearity error 1.0 mmHg"},
+            {"test_name": "EMC Immunity", "result": "PASS", "unit": "-", "evidence": "8kV air / 6kV contact ESD immunity satisfied per IEC 60601-1-2"},
+            {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Auditory alarm sound pressure 70 dBA measured per IEC 60601-1-8"},
+            {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Summative usability evaluation complete per IEC 62366-1"},
+            {"test_name": "Risk Management", "result": "PASS", "evidence": "ISO 14971 risk management file audit verified"},
+            {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "IEC 62304 Class B firmware verification & validation passed"},
+            {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Rating plate & CE mark verified"}
+        ]
+    },
+    {
+        "cat_key": "ECG / Electrocardiograph",
+        "model": "ECG-1200",
+        "mfr": "BioSignal Instruments",
+        "serial": "SN-ECG-992",
+        "report_num": "TRF-2026-ECG02",
+        "expected_outcome": "FAIL",
+        "tests": [
+            {"test_name": "Leakage Current", "result": 0.18, "unit": "mA", "evidence": "Earth leakage current normal condition"},
+            {"test_name": "Insulation Resistance", "result": 85.0, "unit": "MΩ", "evidence": "Mains supply insulation OK"},
+            {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "4000V high voltage insulation test satisfied"},
+            {"test_name": "Temperature", "result": 36.2, "unit": "°C", "evidence": "Enclosure surface temp 36.2 °C"},
+            {"test_name": "Patient Leakage Current", "result": 0.08, "unit": "mA", "evidence": "Direct patient lead auxiliary current 0.08 mA - EXCEEDS LIMIT (<= 0.05 mA)"},
+            {"test_name": "Defibrillator Discharge Test", "result": "PASS", "evidence": "Post 5kV energy recovery verified per IEC 60601-2-25"},
+            {"test_name": "ECG Frequency Bandwidth", "result": 160.0, "unit": "Hz", "evidence": "3dB frequency bandwidth 0.05 - 160 Hz"},
+            {"test_name": "Pacemaker Pulse Suppression", "result": "PASS", "evidence": "Rejection of 2mV pacemaker pulse confirmed"},
+            {"test_name": "EMC Immunity", "result": "PASS", "evidence": "Radiated RF field immunity 10 V/m satisfied"},
+            {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Lead-off visual & auditory alarm 74 dBA"},
+            {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Lead color coding usability verified"},
+            {"test_name": "Risk Management", "result": "PASS", "evidence": "ISO 14971 risk management file verified"},
+            {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "ECG rhythm analysis algorithm verified per IEC 62304"},
+            {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Defibrillator proof warning label present"}
+        ]
+    },
+    {
+        "cat_key": "Patient Monitor",
+        "model": "PM-800",
+        "mfr": "OmniCare Diagnostics",
+        "serial": "SN-PM-8840",
+        "report_num": "TRF-2026-PM03",
+        "expected_outcome": "NEEDS REVIEW",
+        "tests": [
+            {"test_name": "Leakage Current", "result": 0.29, "unit": "mA", "evidence": "Normal condition earth leakage"},
+            {"test_name": "Insulation Resistance", "result": 120.0, "unit": "MΩ", "evidence": "Primary isolation 120 MΩ"},
+            {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "4500V dielectric breakdown check satisfied"},
+            {"test_name": "Temperature", "result": 38.1, "unit": "°C", "evidence": "Enclosure surface temp 38.1 °C"},
+            {"test_name": "Patient Leakage Current", "result": 0.03, "unit": "mA", "evidence": "Patient auxiliary leakage 0.03 mA"},
+            {"test_name": "Channel Isolation", "result": 4000.0, "unit": "V", "evidence": "High voltage channel isolation verified"},
+            {"test_name": "Waveform Display Latency", "result": 65.0, "unit": "ms", "evidence": "Real-time sweep rendering latency 65 ms"},
+            {"test_name": "EMC Immunity", "result": "PASS", "evidence": "10 V/m RF field immunity satisfied"},
+            {"test_name": "Alarm Priority", "result": "UNRECORDED", "evidence": "Auditory alarm sound pressure level missing in test records section 3"},
+            {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Display layout & touch screen usability validated"},
+            {"test_name": "Risk Management", "result": "PASS", "evidence": "ISO 14971 risk management file verified"},
+            {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Multi-parameter software verification complete"},
+            {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Rating plate & CE markings present"}
+        ]
+    },
+    {
+        "cat_key": "Infusion Pump",
+        "model": "IP-500",
+        "mfr": "FluidCare Medical Equipment",
+        "serial": "SN-IP-5011",
+        "report_num": "TRF-2026-IP04",
+        "expected_outcome": "FAIL",
+        "tests": [
+            {"test_name": "Leakage Current", "result": 0.31, "unit": "mA", "evidence": "Standard enclosure leakage test"},
+            {"test_name": "Insulation Resistance", "result": 110.0, "unit": "MΩ", "evidence": "Mains supply insulation 110 MΩ"},
+            {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "3000V high voltage isolation check"},
+            {"test_name": "Temperature", "result": 39.2, "unit": "°C", "evidence": "Motor housing surface temp 39.2 °C"},
+            {"test_name": "Patient Leakage Current", "result": 0.02, "unit": "mA", "evidence": "Patient lead leakage 0.02 mA"},
+            {"test_name": "Flow Delivery Accuracy", "result": 2.1, "unit": "%", "evidence": "Volumetric delivery rate error 2.1% (limit <= 5.0%)"},
+            {"test_name": "Occlusion Pressure Limit", "result": 135.0, "unit": "kPa", "evidence": "Downstream occlusion pressure 135 kPa - EXCEEDS SAFETY LIMIT (<= 100 kPa)"},
+            {"test_name": "Air Bubble Detection", "result": 35.0, "unit": "µL", "evidence": "Ultrasonic air sensor trigger 35 µL"},
+            {"test_name": "EMC Immunity", "result": "PASS", "evidence": "Conducted disturbances immunity satisfied"},
+            {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Red high priority occlusion alarm 78 dBA"},
+            {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Dosing unit input usability validated"},
+            {"test_name": "Risk Management", "result": "PASS", "evidence": "Infusion risk hazard analysis verified"},
+            {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Pump motor control software Class C verified"},
+            {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Flow direction markings present"}
+        ]
+    },
+    {
+        "cat_key": "Infusion Syringe Pump",
+        "model": "SP-200",
+        "mfr": "FluidCare Medical Equipment",
+        "serial": "SN-SP-2004",
+        "report_num": "TRF-2026-SP05",
+        "expected_outcome": "PASS",
+        "tests": [
+            {"test_name": "Leakage Current", "result": 0.25, "unit": "mA", "evidence": "Enclosure leakage test 0.25 mA"},
+            {"test_name": "Insulation Resistance", "result": 95.0, "unit": "MΩ", "evidence": "Mains insulation test 95 MΩ"},
+            {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "3000V high voltage isolation satisfied"},
+            {"test_name": "Temperature", "result": 36.8, "unit": "°C", "evidence": "Enclosure surface temp 36.8 °C"},
+            {"test_name": "Patient Leakage Current", "result": 0.01, "unit": "mA", "evidence": "Patient lead leakage 0.01 mA"},
+            {"test_name": "Syringe Barrel Fit Test", "result": "PASS", "evidence": "Optical sensor syringe size check"},
+            {"test_name": "Flow Delivery Accuracy", "result": 1.8, "unit": "%", "evidence": "Volumetric delivery accuracy 1.8%"},
+            {"test_name": "Occlusion Pressure Limit", "result": 85.0, "unit": "kPa", "evidence": "Occlusion pressure relief 85 kPa (limit <= 100 kPa)"},
+            {"test_name": "EMC Immunity", "result": "PASS", "evidence": "8kV ESD immunity satisfied"},
+            {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Syringe empty auditory alarm 72 dBA"},
+            {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Syringe loading ergonomics file verified"},
+            {"test_name": "Risk Management", "result": "PASS", "evidence": "ISO 14971 risk management file complete"},
+            {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Syringe drive firmware verification complete"},
+            {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Syringe size compatibility plate present"}
+        ]
+    },
+    {
+        "cat_key": "Ventilator",
+        "model": "V-900",
+        "mfr": "RespiTech Care Systems",
+        "serial": "SN-VENT-901",
+        "report_num": "TRF-2026-VENT06",
+        "expected_outcome": "FAIL",
+        "tests": [
+            {"test_name": "Leakage Current", "result": 0.45, "unit": "mA", "evidence": "Earth leakage 0.45 mA"},
+            {"test_name": "Insulation Resistance", "result": 75.0, "unit": "MΩ", "evidence": "Primary insulation 75 MΩ"},
+            {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "4000V high voltage check satisfied"},
+            {"test_name": "Temperature", "result": 42.1, "unit": "°C", "evidence": "Blower motor temp 42.1 °C"},
+            {"test_name": "Patient Leakage Current", "result": 0.03, "unit": "mA", "evidence": "Patient circuit leakage 0.03 mA"},
+            {"test_name": "Tidal Volume Accuracy", "result": 4.2, "unit": "%", "evidence": "Volume delivery tolerance 4.2%"},
+            {"test_name": "Max Airway Pressure", "result": 68.0, "unit": "cmH2O", "evidence": "Airway pressure cutoff 68 cmH2O - EXCEEDS LIMIT (<= 60 cmH2O)"},
+            {"test_name": "Battery Backup Operating Time", "result": 22.0, "unit": "min", "evidence": "Internal battery operating time 22 mins - BELOW MINIMUM (>= 60 min)"},
+            {"test_name": "EMC Immunity", "result": "PASS", "evidence": "10 V/m RF field immunity satisfied"},
+            {"test_name": "Alarm Priority", "result": "PASS", "evidence": "High urgency apnea alarm 82 dBA"},
+            {"test_name": "Usability Engineering", "result": "PASS", "evidence": "ICU clinical user evaluation complete"},
+            {"test_name": "Risk Management", "result": "PASS", "evidence": "Ventilator hazard mitigation file verified"},
+            {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Critical software architecture Class C verified"},
+            {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Oxygen supply inlet markings present"}
+        ]
+    },
+    {
+        "cat_key": "Defibrillator",
+        "model": "DEF-700",
+        "mfr": "LifePulse Resuscitation Tech",
+        "serial": "SN-DEF-7002",
+        "report_num": "TRF-2026-DEF07",
+        "expected_outcome": "PASS",
+        "tests": [
+            {"test_name": "Leakage Current", "result": 0.20, "unit": "mA", "evidence": "Earth leakage test 0.20 mA"},
+            {"test_name": "Insulation Resistance", "result": 150.0, "unit": "MΩ", "evidence": "Mains insulation 150 MΩ"},
+            {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "5000V paddle isolation barrier satisfied"},
+            {"test_name": "Temperature", "result": 38.9, "unit": "°C", "evidence": "Internal capacitor temp 38.9 °C"},
+            {"test_name": "Patient Leakage Current", "result": 0.02, "unit": "mA", "evidence": "Patient auxiliary leakage 0.02 mA"},
+            {"test_name": "Defibrillation Energy Accuracy", "result": 3.5, "unit": "%", "evidence": "Output energy error 3.5% at 360J"},
+            {"test_name": "Maximum Charge Time", "result": 6.2, "unit": "s", "evidence": "Capacitor charge time to max energy 6.2s (limit <= 15.0s)"},
+            {"test_name": "Internal Auto-discharge", "result": 1.1, "unit": "s", "evidence": "Safety discharge time 1.1s (limit <= 2.0s)"},
+            {"test_name": "EMC Immunity", "result": "PASS", "evidence": "Surge immunity test satisfied"},
+            {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Ready for shock audio indicator 75 dBA"},
+            {"test_name": "Usability Engineering", "result": "PASS", "evidence": "AED rescue user flow usability complete"},
+            {"test_name": "Risk Management", "result": "PASS", "evidence": "High energy discharge hazard file verified"},
+            {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Shock delivery firmware verification complete"},
+            {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Paddle energy rating & CE mark verified"}
+        ]
+    },
+    {
+        "cat_key": "Pulse Oximeter",
+        "model": "PO-50",
+        "mfr": "OptiPulse Healthcare",
+        "serial": "SN-PO-501",
+        "report_num": "TRF-2026-PO08",
+        "expected_outcome": "PASS",
+        "tests": [
+            {"test_name": "Leakage Current", "result": 0.15, "unit": "mA", "evidence": "Normal condition leakage 0.15 mA"},
+            {"test_name": "Insulation Resistance", "result": 110.0, "unit": "MΩ", "evidence": "Primary insulation 110 MΩ"},
+            {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "2500V isolation barrier check satisfied"},
+            {"test_name": "Temperature", "result": 39.1, "unit": "°C", "evidence": "Optical probe surface temp 39.1 °C (limit <= 41.0 °C)"},
+            {"test_name": "Patient Leakage Current", "result": 0.01, "unit": "mA", "evidence": "Patient probe leakage 0.01 mA"},
+            {"test_name": "SpO2 Measurement Accuracy", "result": 1.2, "unit": "%", "evidence": "RMS SpO2 accuracy deviation 1.2% per ISO 80601-2-61"},
+            {"test_name": "Pulse Rate Measurement Accuracy", "result": 1.5, "unit": "bpm", "evidence": "Pulse rate accuracy 1.5 bpm"},
+            {"test_name": "EMC Immunity", "result": "PASS", "evidence": "8kV ESD air discharge satisfied"},
+            {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Desaturation alarm signal 70 dBA"},
+            {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Probe attachment usability file complete"},
+            {"test_name": "Risk Management", "result": "PASS", "evidence": "ISO 14971 risk management file verified"},
+            {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Oximetry signal processing software verified"},
+            {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Optical probe rating label present"}
+        ]
+    },
+    {
+        "cat_key": "Electrosurgical Unit",
+        "model": "ESU-400",
+        "mfr": "SurgeTech Electrosurgery",
+        "serial": "SN-ESU-4089",
+        "report_num": "TRF-2026-ESU09",
+        "expected_outcome": "FAIL",
+        "tests": [
+            {"test_name": "Leakage Current", "result": 0.35, "unit": "mA", "evidence": "Low frequency mains leakage 0.35 mA"},
+            {"test_name": "Insulation Resistance", "result": 60.0, "unit": "MΩ", "evidence": "Primary insulation 60 MΩ"},
+            {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "3500V generator high voltage check satisfied"},
+            {"test_name": "Temperature", "result": 44.0, "unit": "°C", "evidence": "Heatsink surface temp 44.0 °C"},
+            {"test_name": "High Frequency Leakage Current", "result": 195.0, "unit": "mA", "evidence": "RF leakage at active electrode 195 mA - EXCEEDS LIMIT (<= 150 mA)"},
+            {"test_name": "CQM Neutral Plate Interlock", "result": "PASS", "evidence": "Split return plate alarm interlock verified per IEC 60601-2-2"},
+            {"test_name": "RF Output Power Limit", "result": 380.0, "unit": "W", "evidence": "Maximum RF output power 380 W at 500 ohms"},
+            {"test_name": "EMC Immunity", "result": "PASS", "evidence": "Class A RF radiated emissions satisfied"},
+            {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Neutral electrode fault alarm 80 dBA"},
+            {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Surgical foot pedal ergonomics file verified"},
+            {"test_name": "Risk Management", "result": "PASS", "evidence": "High frequency burn hazard file verified"},
+            {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Generator control software verified"},
+            {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "High frequency warning plate present"}
+        ]
+    },
+    {
+        "cat_key": "X-Ray Diagnostic Equipment",
+        "model": "XR-500",
+        "mfr": "Radiance Imaging Corp",
+        "serial": "SN-XR-5001",
+        "report_num": "TRF-2026-XR10",
+        "expected_outcome": "NEEDS REVIEW",
+        "tests": [
+            {"test_name": "Leakage Current", "result": 0.38, "unit": "mA", "evidence": "Generator cabinet earth leakage 0.38 mA"},
+            {"test_name": "Insulation Resistance", "result": 140.0, "unit": "MΩ", "evidence": "Generator insulation 140 MΩ"},
+            {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "100kV high voltage generator tank check satisfied"},
+            {"test_name": "Temperature", "result": 48.0, "unit": "°C", "evidence": "Anode thermal capacity temp 48.0 °C"},
+            {"test_name": "Radiation Collimation", "result": "PASS", "evidence": "Automatic light beam diaphragm collimation checked per IEC 60601-1-3"},
+            {"test_name": "Tube Voltage Accuracy", "result": 2.4, "unit": "%", "evidence": "kVp output accuracy 2.4% across 80-120 kV range"},
+            {"test_name": "Exposure Time Error", "result": 1.1, "unit": "%", "evidence": "Exposure timer reproducibility check 1.1%"},
+            {"test_name": "Leakage Radiation", "result": "UNRECORDED", "evidence": "Stray radiation measurement data missing in section 4"},
+            {"test_name": "EMC Immunity", "result": "PASS", "evidence": "Class A electromagnetic compatibility satisfied"},
+            {"test_name": "Alarm Priority", "result": "PASS", "evidence": "X-Ray exposure active audible warning 78 dBA"},
+            {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Operator console ergonomics complete"},
+            {"test_name": "Risk Management", "result": "PASS", "evidence": "Diagnostic radiation risk index complete"},
+            {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Exposure control system verification complete"},
+            {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Ionizing radiation warning sign present"}
+        ]
+    },
+    {
+        "cat_key": "Ultrasound Diagnostic Equipment",
+        "model": "US-300",
+        "mfr": "SonoVision Systems",
+        "serial": "SN-US-3009",
+        "report_num": "TRF-2026-US11",
+        "expected_outcome": "PASS",
+        "tests": [
+            {"test_name": "Leakage Current", "result": 0.18, "unit": "mA", "evidence": "Console leakage current 0.18 mA"},
+            {"test_name": "Insulation Resistance", "result": 180.0, "unit": "MΩ", "evidence": "Console insulation 180 MΩ"},
+            {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "3000V transducer isolation barrier check"},
+            {"test_name": "Temperature", "result": 38.5, "unit": "°C", "evidence": "Transducer face temperature steady state 38.5 °C"},
+            {"test_name": "Patient Leakage Current", "result": 0.01, "unit": "mA", "evidence": "Patient probe leakage 0.01 mA"},
+            {"test_name": "Acoustic Mechanical Index", "result": 1.2, "unit": "-", "evidence": "Peak acoustic MI 1.2 (limit <= 1.9) per IEC 60601-2-37"},
+            {"test_name": "Acoustic Thermal Index", "result": 2.1, "unit": "-", "evidence": "Doppler mode TI 2.1 (limit <= 6.0)"},
+            {"test_name": "High Voltage Pulse Stability", "result": 1.5, "unit": "%", "evidence": "Transducer drive voltage stability 1.5%"},
+            {"test_name": "EMC Immunity", "result": "PASS", "evidence": "8kV ESD & RF susceptibility satisfied"},
+            {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Thermal index limit audio warning 72 dBA"},
+            {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Sonographer console usability file verified"},
+            {"test_name": "Risk Management", "result": "PASS", "evidence": "Acoustic output risk management file complete"},
+            {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Ultrasound image processing firmware verified"},
+            {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Acoustic rating plate & CE label present"}
+        ]
+    },
+    {
+        "cat_key": "Surgical Operating Table",
+        "model": "OT-700",
+        "mfr": "SurgeTech Operating Systems",
+        "serial": "SN-OT-7005",
+        "report_num": "TRF-2026-OT12",
+        "expected_outcome": "PASS",
+        "tests": [
+            {"test_name": "Leakage Current", "result": 0.28, "unit": "mA", "evidence": "Hydraulic pump motor leakage 0.28 mA"},
+            {"test_name": "Insulation Resistance", "result": 150.0, "unit": "MΩ", "evidence": "Power supply insulation resistance 150 MΩ"},
+            {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "2000V high voltage motor insulation check"},
+            {"test_name": "Temperature", "result": 41.0, "unit": "°C", "evidence": "Hydraulic oil reservoir temp 41.0 °C"},
+            {"test_name": "Safe Working Load Capacity", "result": 300.0, "unit": "kg", "evidence": "Static load test 300 kg satisfied per IEC 60601-2-46 (limit >= 220 kg)"},
+            {"test_name": "Emergency Brake Release", "result": "PASS", "evidence": "Manual emergency foot lever verified"},
+            {"test_name": "Table Articulation Locking", "result": "PASS", "evidence": "100% mechanical lock under full load"},
+            {"test_name": "Anti-Tip Stability Margin", "result": 15.0, "unit": "deg", "evidence": "Anti-tip static margin 15.0 deg incline"},
+            {"test_name": "EMC Immunity", "result": "PASS", "evidence": "Motor drive EMC immunity satisfied"},
+            {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Battery disconnect warning signal active"},
+            {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Surgical team positioning usability file verified"},
+            {"test_name": "Risk Management", "result": "PASS", "evidence": "Patient fall risk analysis verified"},
+            {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Articulation motor control software verified"},
+            {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Rating plate & CE/FDA markings present"}
+        ]
+    },
+    {
+        "cat_key": "Medical Examination / Treatment Light",
+        "model": "SL-100",
+        "mfr": "LumiMed Lighting Tech",
+        "serial": "SN-SL-1002",
+        "report_num": "TRF-2026-SL13",
+        "expected_outcome": "PASS",
+        "tests": [
+            {"test_name": "Leakage Current", "result": 0.12, "unit": "mA", "evidence": "Luminaire head leakage 0.12 mA"},
+            {"test_name": "Insulation Resistance", "result": 200.0, "unit": "MΩ", "evidence": "Transformer insulation test 200 MΩ"},
+            {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "2500V arm mechanism wire insulation check"},
+            {"test_name": "Temperature", "result": 42.0, "unit": "°C", "evidence": "Lamp enclosure surface temp 42.0 °C"},
+            {"test_name": "Central Illuminance Lux", "result": 120000.0, "unit": "Lux", "evidence": "Measured at 1m focal distance 120000 Lux per IEC 60601-2-41 (40000 - 160000 Lux)"},
+            {"test_name": "Total Light Irradiance", "result": 450.0, "unit": "W/m²", "evidence": "Infrared heat radiation 450 W/m² (limit <= 1000 W/m²)"},
+            {"test_name": "Color Rendering Index Ra", "result": 96.0, "unit": "-", "evidence": "Color rendering index Ra 96 (limit >= 85)"},
+            {"test_name": "EMC Immunity", "result": "PASS", "evidence": "LED driver EMC emissions Class B satisfied"},
+            {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Surgical field light positioning usability complete"},
+            {"test_name": "Risk Management", "result": "PASS", "evidence": "Photobiological hazard analysis verified"},
+            {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Dimming controller firmware verification complete"},
+            {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Safety warning label & CE mark verified"}
+        ]
+    },
+    {
+        "cat_key": "Medical Laboratory / Diagnostic Electrical Equipment",
+        "model": "LA-500",
+        "mfr": "BioLab Analyzer Systems",
+        "serial": "SN-LA-5001",
+        "report_num": "TRF-2026-LA14",
+        "expected_outcome": "PASS",
+        "tests": [
+            {"test_name": "Lab Mains Insulation", "result": 45.0, "unit": "MΩ", "evidence": "IEC 61010 laboratory insulation test 45 MΩ (limit >= 20 MΩ)"},
+            {"test_name": "Enclosure Safety", "result": "PASS", "evidence": "Finger probe mechanical safety checked per IEC 61010-1"},
+            {"test_name": "Thermal Cutoff", "result": 42.0, "unit": "°C", "evidence": "Maximum component temp 42.0 °C (limit <= 55 °C)"},
+            {"test_name": "Sample Splash Guard", "result": "PASS", "evidence": "IVD specimen biological containment verified per IEC 61010-2-101"},
+            {"test_name": "Reagent Storage Temp", "result": 4.5, "unit": "°C", "evidence": "Reagent carousel temp 4.5 °C (range 2.0 - 8.0 °C)"},
+            {"test_name": "Sample Pipetting Volume Accuracy", "result": 0.8, "unit": "%", "evidence": "Pipetting volume accuracy 0.8% (limit <= 2.0%)"},
+            {"test_name": "EMC Immunity", "result": "PASS", "evidence": "Lab analyzer EMC immunity satisfied per IEC 61326-2-6"},
+            {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Reagent low & error audio tone 70 dBA"},
+            {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Lab technician user workflow validated"},
+            {"test_name": "Risk Management", "result": "PASS", "evidence": "Biohazard risk management file complete"},
+            {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Analyzer processing software Class B verified"},
+            {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "Biological hazard label & rating plate present"}
+        ]
+    },
+    {
+        "cat_key": "Medical Electrical Therapy Equipment",
+        "model": "TH-300",
+        "mfr": "NeuroPulse Therapy Inc",
+        "serial": "SN-TH-3004",
+        "report_num": "TRF-2026-TH15",
+        "expected_outcome": "FAIL",
+        "tests": [
+            {"test_name": "Leakage Current", "result": 0.22, "unit": "mA", "evidence": "Earth leakage test 0.22 mA"},
+            {"test_name": "Insulation Resistance", "result": 90.0, "unit": "MΩ", "evidence": "Primary insulation 90 MΩ"},
+            {"test_name": "Dielectric Strength", "result": "PASS", "unit": "-", "evidence": "3000V output isolation check satisfied"},
+            {"test_name": "Temperature", "result": 38.0, "unit": "°C", "evidence": "Electrode pad surface temp 38.0 °C"},
+            {"test_name": "Patient Leakage Current", "result": 0.02, "unit": "mA", "evidence": "Patient auxiliary leakage 0.02 mA"},
+            {"test_name": "Stimulus Current Amplitude", "result": 65.0, "unit": "mA", "evidence": "Pulse amplitude 65 mA per IEC 60601-2-10 (limit <= 80 mA)"},
+            {"test_name": "DC Current Offset", "result": 0.45, "unit": "mA", "evidence": "Direct current offset 0.45 mA - EXCEEDS SAFETY LIMIT (<= 0.10 mA)"},
+            {"test_name": "Pulse Duration Accuracy", "result": 2.0, "unit": "%", "evidence": "Pulse duration accuracy 2.0%"},
+            {"test_name": "EMC Immunity", "result": "PASS", "evidence": "8kV ESD air discharge satisfied"},
+            {"test_name": "Alarm Priority", "result": "PASS", "evidence": "Electrode disconnect audio warning 72 dBA"},
+            {"test_name": "Usability Engineering", "result": "PASS", "evidence": "Patient electrode placement usability verified"},
+            {"test_name": "Risk Management", "result": "PASS", "evidence": "Tissue burn & direct current risk file verified"},
+            {"test_name": "Software Lifecycle", "result": "PASS", "evidence": "Stimulation pulse control firmware verified"},
+            {"test_name": "Label Verification", "result": "COMPLETE", "evidence": "High voltage output warning plate present"}
+        ]
+    }
+]
+demo_scenarios = DEMO_SCENARIOS
+
+def seed_all_15_demo_evaluations(db: Session):
+    sample_dir = settings.SAMPLE_DIR
+    upload_dir = settings.UPLOAD_DIR
+    os.makedirs(sample_dir, exist_ok=True)
+    os.makedirs(upload_dir, exist_ok=True)
 
     # Delete existing sample evaluations to avoid duplicates
     db.query(EvaluationResult).delete()
@@ -442,9 +449,6 @@ def seed_all_15_demo_evaluations(db: Session):
     db.commit()
 
     for idx, sc in enumerate(demo_scenarios, start=1):
-        cat_key = sc["cat_key"]
-        cat_info = DEVICE_CATEGORIES_MAPPING[cat_key]
-        model = sc["model"]
         mfr = sc["mfr"]
         serial = sc["serial"]
         report_num = sc["report_num"]
