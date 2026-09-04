@@ -324,8 +324,8 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-sans">
-              {evaluations.length > 0 ? (
-                evaluations.map((ev) => (
+              {safeEvals.length > 0 ? (
+                safeEvals.map((ev) => (
                   <tr key={ev.id} className="hover:bg-slate-50/80 transition">
                     <td className="p-3.5 font-semibold text-slate-900">
                       <div>{ev.device_model || 'Medical Device'}</div>

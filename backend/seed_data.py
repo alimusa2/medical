@@ -42,6 +42,32 @@ def seed_database(db: Session):
             db.add(Standard(name=s_name, edition=s_ed, description=s_desc))
     db.commit()
 
+    # 2.5 Seed Requirements Table from Knowledge Base
+    from services.standards_kb import STANDARDS_KNOWLEDGE_BASE
+    dev_type_obj = db.query(DeviceType).first()
+    dev_type_id = dev_type_obj.id if dev_type_obj else 1
+    for std_name, std_info in STANDARDS_KNOWLEDGE_BASE.items():
+        std_obj = db.query(Standard).filter_by(name=std_name).first()
+        if not std_obj:
+            continue
+        for area in std_info.get("evaluation_areas", []):
+            req_code = f"REQ-{std_name.replace(' ', '-').replace('/', '-')}-{area['param'].replace(' ', '-')}"
+            existing = db.query(Requirement).filter_by(requirement_code=req_code).first()
+            if not existing:
+                db.add(Requirement(
+                    requirement_code=req_code,
+                    standard_id=std_obj.id,
+                    device_type_id=dev_type_id,
+                    title=area["area"],
+                    test_parameter=area["param"],
+                    operator=area.get("op", "=="),
+                    minimum_value=area.get("min_val"),
+                    maximum_value=area.get("max_val"),
+                    expected_text=area.get("exp_text"),
+                    unit=area.get("unit")
+                ))
+    db.commit()
+
     # 3. Generate 15 Synthetic Sample TRFs & Seed Database Evaluations
     seed_all_15_demo_evaluations(db)
 

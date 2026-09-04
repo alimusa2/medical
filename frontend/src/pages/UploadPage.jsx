@@ -28,9 +28,14 @@ export default function UploadPage() {
 
   useEffect(() => {
     samplesApi.list()
-      .then(res => setSamples(res.data || []))
-      .catch(err => console.error(err));
+      .then(res => setSamples(Array.isArray(res.data) ? res.data : []))
+      .catch(err => {
+        console.error(err);
+        setSamples([]);
+      });
   }, []);
+
+  const safeSamples = Array.isArray(samples) ? samples : [];
 
   const pipelineSteps = [
     "Reading document & verifying file structure",
@@ -313,7 +318,7 @@ export default function UploadPage() {
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {samples.map((s, i) => (
+          {safeSamples.map((s, i) => (
             <button
               key={i}
               onClick={() => handleRunSampleDemo(s.filename)}
