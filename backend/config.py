@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent
 
-IS_VERCEL = bool(os.getenv("VERCEL"))
+IS_VERCEL = bool(os.getenv("VERCEL")) or bool(os.getenv("VERCEL_ENV")) or (os.name != "nt" and os.path.exists("/tmp"))
 TMP_DIR = Path("/tmp") if IS_VERCEL else BASE_DIR
 
 class Settings(BaseSettings):
