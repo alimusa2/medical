@@ -13,7 +13,8 @@ from config import settings
 
 router = APIRouter(tags=["documents"])
 
-@router.post("/upload", response_model=UploadedDocumentSchema)
+@router.api_route("/upload", methods=["POST", "OPTIONS"], response_model=UploadedDocumentSchema)
+@router.api_route("/upload/", methods=["POST", "OPTIONS"], response_model=UploadedDocumentSchema)
 async def upload_document(file: UploadFile = File(...), db: Session = Depends(get_db)):
     # Validate file extension
     ext = file.filename.split(".")[-1].lower() if "." in file.filename else ""

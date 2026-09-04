@@ -25,7 +25,8 @@ def get_evaluation(eval_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Evaluation record not found")
     return ev
 
-@router.post("/document/{doc_id}/run", response_model=EvaluationSchema)
+@router.api_route("/document/{doc_id}/run", methods=["POST", "OPTIONS"], response_model=EvaluationSchema)
+@router.api_route("/document/{doc_id}/run/", methods=["POST", "OPTIONS"], response_model=EvaluationSchema)
 def run_evaluation(doc_id: int, db: Session = Depends(get_db)):
     doc = db.query(UploadedDocument).filter(UploadedDocument.id == doc_id).first()
     if not doc:
