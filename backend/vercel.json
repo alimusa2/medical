@@ -1,11 +1,4 @@
 {
-  "version": 2,
-  "functions": {
-    "api/index.py": {
-      "memory": 1024,
-      "maxDuration": 60
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -17,4 +10,3 @@
     }
   ]
 }
-
