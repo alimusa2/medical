@@ -41,15 +41,16 @@ except Exception as e:
     err_trace = traceback.format_exc()
     print(f"[VERCEL INITIALIZATION ERROR]: {err_trace}")
     
-    from fastapi import FastAPI
-    app = FastAPI(title="MedVerify AI API (Diagnostic)")
+    from starlette.responses import JSONResponse
     
-    @app.get("/")
-    @app.api_route("/{full_path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"])
-    def catch_all(full_path: str = ""):
-        return {
-            "status": "error",
-            "message": "Backend module import failed during serverless startup",
-            "error": err_msg,
-            "traceback": err_trace
-        }
+    class ErrorApp:
+        async def __call__(self, scope, receive, send):
+            resp = JSONResponse({
+                "status": "error",
+                "message": "Backend module import failed during serverless startup",
+                "error": err_msg,
+                "traceback": err_trace.splitlines()
+            }, status_code=500)
+            await resp(scope, receive, send)
+            
+    app = ErrorApp()
