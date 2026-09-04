@@ -101,16 +101,47 @@ async def vercel_path_rewrite_middleware(request, call_next):
 from starlette.routing import Match
 from fastapi import Request
 
-# Explicit Vercel Serverless Index Handler (dispatches rewritten POST/GET requests to target routes)
+# Explicit Vercel Serverless Index Handler (dispatches rewritten POST/GET requests directly)
 @app.api_route("/api/index.py", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"])
 @app.api_route("/index.py", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"])
 async def vercel_index_handler(request: Request):
     q_path = request.query_params.get("__path__") or request.query_params.get("path")
     matched_header = request.headers.get("x-matched-path") or request.headers.get("x-forwarded-uri")
     
-    target_path = q_path or matched_header or "/"
+    target_path = q_path or matched_header or request.url.path
     clean_target = "/" + target_path.lstrip("/")
-    
+
+    # 1. Document Upload Direct Route
+    if "upload" in clean_target and request.method in ["POST", "OPTIONS"]:
+        from database import SessionLocal
+        from routers.documents import upload_document
+        db = SessionLocal()
+        try:
+            form = await request.form()
+            file = form.get("file")
+            if file:
+                return await upload_document(file=file, db=db)
+            else:
+                from fastapi import HTTPException
+                raise HTTPException(status_code=400, detail="No file found in upload request form")
+        finally:
+            db.close()
+
+    # 2. Run Evaluation Direct Route
+    if "evaluations" in clean_target and "run" in clean_target and request.method in ["POST", "OPTIONS"]:
+        from database import SessionLocal
+        from routers.evaluations import run_evaluation
+        db = SessionLocal()
+        try:
+            # Extract doc_id from path
+            import re
+            m = re.search(r"document/(\d+)/run", clean_target)
+            if m:
+                doc_id = int(m.group(1))
+                return run_evaluation(doc_id=doc_id, db=db)
+        finally:
+            db.close()
+
     if clean_target in ["/", "/api", "/api/", "/api/index.py", "/index.py"]:
         return {
             "app": "MedVerify AI",
