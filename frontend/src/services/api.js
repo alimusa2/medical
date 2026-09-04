@@ -46,12 +46,12 @@ export const standardsApi = {
 
 export const reportsApi = {
   list: () => api.get('/reports'),
-  getDownloadUrl: (filename) => `/api/reports/${filename}/download`,
+  getDownloadUrl: (filename) => `${API_BASE}/reports/${filename}/download`,
 };
 
 export const samplesApi = {
   list: () => api.get('/samples'),
-  getDownloadUrl: (filename) => `/api/samples/download/${filename}`,
+  getDownloadUrl: (filename) => `${API_BASE}/samples/download/${filename}`,
   runSample: (filename) => api.post(`/samples/run-sample/${filename}`),
 };
 
