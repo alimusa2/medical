@@ -101,14 +101,15 @@ async def vercel_path_rewrite_middleware(request, call_next):
 from starlette.routing import Match
 from fastapi import Request
 
-# Explicit Vercel Serverless Index Handler (dispatches rewritten POST/GET requests directly)
+# Catch-all API Route for Vercel Serverless Function (handles GET, POST, OPTIONS for all routes)
+@app.api_route("/{full_path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"])
 @app.api_route("/api/index.py", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"])
 @app.api_route("/index.py", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"])
-async def vercel_index_handler(request: Request):
+async def vercel_catchall_handler(request: Request, full_path: str = ""):
     q_path = request.query_params.get("__path__") or request.query_params.get("path")
-    matched_header = request.headers.get("x-matched-path") or request.headers.get("x-forwarded-uri")
+    matched_header = request.headers.get("x-forwarded-uri") or request.headers.get("x-matched-path")
     
-    target_path = q_path or matched_header or request.url.path
+    target_path = q_path or matched_header or full_path or request.url.path
     clean_target = "/" + target_path.lstrip("/")
 
     # 1. Document Upload Direct Route
@@ -133,7 +134,6 @@ async def vercel_index_handler(request: Request):
         from routers.evaluations import run_evaluation
         db = SessionLocal()
         try:
-            # Extract doc_id from path
             import re
             m = re.search(r"document/(\d+)/run", clean_target)
             if m:
@@ -142,23 +142,7 @@ async def vercel_index_handler(request: Request):
         finally:
             db.close()
 
-    if clean_target in ["/", "/api", "/api/", "/api/index.py", "/index.py"]:
-        return {
-            "app": "MedVerify AI",
-            "status": "online",
-            "disclaimer": "DEMONSTRATION DATA ONLY — NOT FOR OFFICIAL MEDICAL DEVICE CERTIFICATION USE",
-            "docs_url": "/docs"
-        }
-        
-    scope = dict(request.scope)
-    scope["path"] = clean_target
-    
-    for route in app.routes:
-        if hasattr(route, "matches") and route.path not in ["/api/index.py", "/index.py"]:
-            match, _ = route.matches(scope)
-            if match == Match.FULL:
-                return await route.handle(scope, request._receive, request._send)
-
+    # 3. Default Root Info Response
     return {
         "app": "MedVerify AI",
         "status": "online",
