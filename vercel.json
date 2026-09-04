@@ -2,10 +2,8 @@
   "version": 2,
   "functions": {
     "api/index.py": {
-      "includeFiles": [
-        "backend/**",
-        "backend/**/*"
-      ]
+      "memory": 1024,
+      "maxDuration": 15
     }
   },
   "buildCommand": "node -e \"if (require('fs').existsSync('frontend')) { require('child_process').execSync('cd frontend && npm install && npm run build', {stdio: 'inherit'}); } else { console.log('Building backend deployment'); }\"",
