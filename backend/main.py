@@ -98,6 +98,43 @@ async def vercel_path_rewrite_middleware(request, call_next):
 
     return await call_next(request)
 
+from starlette.routing import Match
+from fastapi import Request
+
+# Explicit Vercel Serverless Index Handler (dispatches rewritten POST/GET requests to target routes)
+@app.api_route("/api/index.py", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"])
+@app.api_route("/index.py", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"])
+async def vercel_index_handler(request: Request):
+    q_path = request.query_params.get("__path__") or request.query_params.get("path")
+    matched_header = request.headers.get("x-matched-path") or request.headers.get("x-forwarded-uri")
+    
+    target_path = q_path or matched_header or "/"
+    clean_target = "/" + target_path.lstrip("/")
+    
+    if clean_target in ["/", "/api", "/api/", "/api/index.py", "/index.py"]:
+        return {
+            "app": "MedVerify AI",
+            "status": "online",
+            "disclaimer": "DEMONSTRATION DATA ONLY — NOT FOR OFFICIAL MEDICAL DEVICE CERTIFICATION USE",
+            "docs_url": "/docs"
+        }
+        
+    scope = dict(request.scope)
+    scope["path"] = clean_target
+    
+    for route in app.routes:
+        if hasattr(route, "matches") and route.path not in ["/api/index.py", "/index.py"]:
+            match, _ = route.matches(scope)
+            if match == Match.FULL:
+                return await route.handle(scope, request._receive, request._send)
+
+    return {
+        "app": "MedVerify AI",
+        "status": "online",
+        "disclaimer": "DEMONSTRATION DATA ONLY — NOT FOR OFFICIAL MEDICAL DEVICE CERTIFICATION USE",
+        "docs_url": "/docs"
+    }
+
 @app.get("/")
 @app.get("/api")
 @app.get("/api/")
