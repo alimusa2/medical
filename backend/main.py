@@ -51,6 +51,40 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Priority Direct Serverless POST Endpoints (registered first to take precedence over GET routes)
+from fastapi import Request, Depends
+from sqlalchemy.orm import Session
+from database import get_db
+
+@app.api_route("/api/documents/upload", methods=["POST", "OPTIONS"])
+@app.api_route("/documents/upload", methods=["POST", "OPTIONS"])
+@app.api_route("/upload", methods=["POST", "OPTIONS"])
+async def direct_upload_document(request: Request):
+    from database import SessionLocal
+    from routers.documents import upload_document
+    db = SessionLocal()
+    try:
+        form = await request.form()
+        file = form.get("file")
+        if file:
+            return await upload_document(file=file, db=db)
+        else:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=400, detail="No file found in form data")
+    finally:
+        db.close()
+
+@app.api_route("/api/evaluations/document/{doc_id}/run", methods=["POST", "OPTIONS"])
+@app.api_route("/evaluations/document/{doc_id}/run", methods=["POST", "OPTIONS"])
+def direct_run_evaluation(doc_id: int, db: Session = Depends(get_db)):
+    from database import SessionLocal
+    from routers.evaluations import run_evaluation
+    db = SessionLocal()
+    try:
+        return run_evaluation(doc_id=doc_id, db=db)
+    finally:
+        db.close()
+
 # Include API Routers cleanly (registered under /api and /<name> prefixes)
 routers = [
     ("/api/documents", "/documents", documents.router),
