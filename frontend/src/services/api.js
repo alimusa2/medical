@@ -1,11 +1,19 @@
 import axios from 'axios';
 
 const getApiBase = () => {
-  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
-  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
-    return 'https://medical-backend2.vercel.app/api';
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl && (envUrl.startsWith('http://') || envUrl.startsWith('https://'))) {
+    return envUrl.replace(/\/$/, '');
   }
-  return '/api';
+
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return envUrl || '/api';
+    }
+  }
+
+  return 'https://medical-backend2.vercel.app/api';
 };
 
 const API_BASE = getApiBase();

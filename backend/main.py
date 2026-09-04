@@ -51,21 +51,43 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Priority Direct Serverless POST Endpoints (registered first to take precedence over GET routes)
 from fastapi import Request, Depends
 from sqlalchemy.orm import Session
 from database import get_db
 
+# OPTIONS Preflight Interceptor Middleware
+@app.middleware("http")
+async def options_preflight_middleware(request: Request, call_next):
+    if request.method == "OPTIONS":
+        from starlette.responses import Response
+        return Response(
+            status_code=200,
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "*",
+                "Access-Control-Allow-Headers": "*",
+            }
+        )
+    return await call_next(request)
+
+# Priority Direct Serverless POST Endpoints (registered first to take precedence over GET routes)
 @app.api_route("/api/documents/upload", methods=["POST", "OPTIONS"])
 @app.api_route("/documents/upload", methods=["POST", "OPTIONS"])
 @app.api_route("/upload", methods=["POST", "OPTIONS"])
 async def direct_upload_document(request: Request):
+    if request.method == "OPTIONS":
+        from starlette.responses import Response
+        return Response(status_code=200)
     from database import SessionLocal
     from routers.documents import upload_document
     db = SessionLocal()
     try:
-        form = await request.form()
-        file = form.get("file")
+        try:
+            form = await request.form()
+            file = form.get("file")
+        except Exception:
+            file = None
+
         if file:
             return await upload_document(file=file, db=db)
         else:
@@ -76,7 +98,10 @@ async def direct_upload_document(request: Request):
 
 @app.api_route("/api/evaluations/document/{doc_id}/run", methods=["POST", "OPTIONS"])
 @app.api_route("/evaluations/document/{doc_id}/run", methods=["POST", "OPTIONS"])
-def direct_run_evaluation(doc_id: int, db: Session = Depends(get_db)):
+async def direct_run_evaluation(doc_id: int, request: Request, db: Session = Depends(get_db)):
+    if request.method == "OPTIONS":
+        from starlette.responses import Response
+        return Response(status_code=200)
     from database import SessionLocal
     from routers.evaluations import run_evaluation
     db = SessionLocal()
