@@ -86,6 +86,16 @@ async def vercel_path_rewrite_middleware(request, call_next):
     if real_path:
         request.scope["path"] = real_path
 
+    if request.scope.get("path") in ["/debug-routes", "/api/debug-routes"]:
+        from starlette.responses import JSONResponse
+        return JSONResponse({
+            "method": request.method,
+            "raw_path": request.url.path,
+            "scope_path": request.scope.get("path"),
+            "headers": {k.decode("latin1"): v.decode("latin1") for k, v in request.scope.get("headers", [])},
+            "routes": [getattr(r, "path", str(r)) for r in app.routes]
+        })
+
     return await call_next(request)
 
 @app.get("/")
