@@ -2,7 +2,10 @@
   "name": "medverify-ai",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
-    "build": "node -e \"if (require('fs').existsSync('frontend')) { require('child_process').execSync('cd frontend && npm install && npm run build', {stdio: 'inherit'}); } else { console.log('Building backend deployment'); }\""
+    "build": "npm run build --workspace=frontend"
   }
 }
