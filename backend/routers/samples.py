@@ -17,38 +17,32 @@ router = APIRouter(prefix="/api/samples", tags=["samples"])
 
 @router.get("")
 def list_sample_trfs(db: Session = Depends(get_db)):
-    # Make sure samples exist
-    if not os.path.exists(settings.SAMPLE_DIR) or len(os.listdir(settings.SAMPLE_DIR)) == 0:
-        from seed_data import seed_database
-        seed_database(db)
-
+    from seed_data import demo_scenarios
     samples = []
-    if os.path.exists(settings.SAMPLE_DIR):
-        for fname in sorted(os.listdir(settings.SAMPLE_DIR)):
-            if not fname.endswith(".pdf"):
-                continue
-            fpath = os.path.join(settings.SAMPLE_DIR, fname)
-            stat = os.stat(fpath)
-            
-            # Format clean human label from filename
-            parts = fname.replace(".pdf", "").split("_")
-            dev_label = " ".join(parts[3:]) if len(parts) > 3 else fname
-            
-            samples.append({
-                "filename": fname,
-                "label": f"Demo TRF: {dev_label}",
-                "size_bytes": stat.st_size,
-                "file_type": "PDF",
-                "download_url": f"/api/samples/download/{fname}"
-            })
+    os.makedirs(settings.SAMPLE_DIR, exist_ok=True)
+    
+    for idx, sc in enumerate(demo_scenarios, start=1):
+        cat_key = sc["cat_key"]
+        fname = f"demo_TRF_{idx:02d}_{cat_key.replace(' ', '_').replace('/', '_')}.pdf"
+        dev_label = cat_key
+        fpath = os.path.join(settings.SAMPLE_DIR, fname)
+        size_b = os.path.getsize(fpath) if os.path.exists(fpath) else 25000
+
+        samples.append({
+            "filename": fname,
+            "label": f"Demo TRF: {dev_label}",
+            "size_bytes": size_b,
+            "file_type": "PDF",
+            "download_url": f"/api/samples/download/{fname}"
+        })
     return samples
 
 @router.get("/download/{filename}")
 def download_sample_trf(filename: str, db: Session = Depends(get_db)):
     file_path = os.path.join(settings.SAMPLE_DIR, filename)
     if not os.path.exists(file_path):
-        from seed_data import seed_database
-        seed_database(db)
+        from seed_data import generate_sample_pdf_by_filename
+        generate_sample_pdf_by_filename(filename)
 
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Sample TRF file not found")
@@ -60,8 +54,8 @@ def download_sample_trf(filename: str, db: Session = Depends(get_db)):
 def run_sample_evaluation(filename: str, db: Session = Depends(get_db)):
     file_path = os.path.join(settings.SAMPLE_DIR, filename)
     if not os.path.exists(file_path):
-        from seed_data import seed_database
-        seed_database(db)
+        from seed_data import generate_sample_pdf_by_filename
+        generate_sample_pdf_by_filename(filename)
 
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Sample file not found")

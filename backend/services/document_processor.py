@@ -1,7 +1,6 @@
 import json
 import re
 from typing import Dict, Any, List
-import pandas as pd
 
 from schemas import NormalizedTRFSchema, DeviceInfoSchema, ExtractedStandardSchema, ExtractedTestSchema
 
@@ -86,11 +85,13 @@ class DocumentProcessor:
 
     @staticmethod
     def _process_csv(file_path: str) -> NormalizedTRFSchema:
+        import pandas as pd
         df = pd.read_csv(file_path)
         return DocumentProcessor._parse_dataframe(df)
 
     @staticmethod
     def _process_xlsx(file_path: str) -> NormalizedTRFSchema:
+        import pandas as pd
         df = pd.read_excel(file_path)
         return DocumentProcessor._parse_dataframe(df)
 
@@ -113,7 +114,8 @@ class DocumentProcessor:
         return DocumentProcessor._parse_extracted_text(text_str)
 
     @staticmethod
-    def _parse_dataframe(df: pd.DataFrame) -> NormalizedTRFSchema:
+    def _parse_dataframe(df) -> NormalizedTRFSchema:
+        import pandas as pd
         # Standardize column headers
         df.columns = [str(c).strip().lower() for c in df.columns]
 
