@@ -51,22 +51,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include API Routers (register under /api, /<router>, and root prefixes for 100% serverless path matching)
-router_configs = [
-    ("/api/documents", "/documents", "", documents.router),
-    ("/api/evaluations", "/evaluations", "", evaluations.router),
-    ("/api/standards", "/standards", "", standards.router),
-    ("/api/reports", "/reports", "", reports.router),
-    ("/api/certifier", "/certifier", "", certifier.router),
-    ("/api/settings", "/settings", "", settings_router.router),
-    ("/api/samples", "/samples", "", samples.router),
+# Include API Routers cleanly (registered under /api and /<name> prefixes)
+routers = [
+    ("/api/documents", "/documents", documents.router),
+    ("/api/evaluations", "/evaluations", evaluations.router),
+    ("/api/standards", "/standards", standards.router),
+    ("/api/reports", "/reports", reports.router),
+    ("/api/certifier", "/certifier", certifier.router),
+    ("/api/settings", "/settings", settings_router.router),
+    ("/api/samples", "/samples", samples.router),
 ]
 
-for p1, p2, p3, r in router_configs:
+for p1, p2, r in routers:
     app.include_router(r, prefix=p1)
     app.include_router(r, prefix=p2)
-    if p3 is not None:
-        app.include_router(r, prefix=p3)
+
 
 
 
