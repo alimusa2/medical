@@ -1,6 +1,7 @@
 import sys
 import os
 import traceback
+from urllib.parse import parse_qs
 
 # Ensure root directory and backend directory are in sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,9 +15,29 @@ for d in [backend_dir, root_dir, current_dir]:
 # Set VERCEL environment flag
 os.environ["VERCEL"] = "1"
 
+class VercelPathRewriteASGI:
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http":
+            query_string = scope.get("query_string", b"").decode("utf-8")
+            qs = parse_qs(query_string)
+            path_param = qs.get("path", [None])[0]
+
+            if path_param:
+                scope["path"] = "/" + path_param.lstrip("/")
+            else:
+                headers = dict(scope.get("headers", []))
+                matched_header = headers.get(b"x-matched-path", b"").decode("utf-8")
+                if matched_header and matched_header not in ["/api/index.py", "/", "/index.py"]:
+                    scope["path"] = matched_header
+
+        await self.app(scope, receive, send)
+
 try:
     import backend.main
-    app = backend.main.app
+    app = VercelPathRewriteASGI(backend.main.app)
 except Exception as e:
     err_msg = str(e)
     err_trace = traceback.format_exc()
